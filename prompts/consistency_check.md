@@ -22,6 +22,12 @@ Also include up to 3 important checks that came out **consistent**, so the reade
 3. **Be specific and fair.** If a difference is small or plausibly explained (e.g. rounding), say so and use the flag "Needs explanation" rather than "Inconsistent". Use "Inconsistent" only when the statement and the numbers cannot both be right as written.
 4. Order items from most to least important for an investment decision. Maximum 10 items.
 
+## Already found (by code and earlier passes)
+
+Do not repeat these. Find what they missed. Places reviewers commonly miss: tax rate explanations vs. the tax reconciliation; capex and cash flow characterizations; segment explanations; characterizations in the business description and risk factors ("non-recurring", "strong", "primarily due to") vs. the notes; guidance vs. backlog and trends.
+
+{{ALREADY_FOUND}}
+
 ## Narrative and statement findings
 
 {{NARRATIVE}}

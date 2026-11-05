@@ -11,6 +11,7 @@ on later steps doesn't re-pay for extraction.
 
 import hashlib
 import json
+import re
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
@@ -34,22 +35,48 @@ class MapResult:
     out_dir: Path
 
 
-def _fingerprint() -> str:
-    key = load_prompt("extract_findings.md") + config.MODEL + config.EFFORT
+NARRATIVE_ID_OFFSET = 50     # narrative-pass findings get IDs F51-..., F52-...
+
+
+def _fingerprint(prompt_name: str = "extract_findings.md") -> str:
+    key = load_prompt(prompt_name) + config.MODEL + config.EFFORT
     return hashlib.sha256(key.encode()).hexdigest()[:12]
 
 
-def _extract_cached(chunk: Chunk, cache_dir: Path, fp: str, fresh: bool) -> list[dict]:
-    path = cache_dir / f"chunk_{chunk.index:02d}.json"
+def _extract_cached(chunk: Chunk, cache_dir: Path, fp: str, fresh: bool, prefix: str = "chunk",
+                    prompt_name: str = "extract_findings.md", id_offset: int = 0) -> list[dict]:
+    path = cache_dir / f"{prefix}_{chunk.index:02d}.json"
+    label = "extract chunk" if prefix == "chunk" else "MD&A narrative chunk"
     if path.exists() and not fresh:
         saved = json.loads(path.read_text(encoding="utf-8"))
-        if saved.get("fingerprint") == fp:
-            print(f"  [extract chunk {chunk.index}] reused saved result")
+        if saved.get("fingerprint") == fp and saved.get("pages") == chunk.refs:
+            print(f"  [{label} {chunk.index}] reused saved result")
             return saved["findings"]
-    findings = extract_chunk(chunk)
+    findings = extract_chunk(chunk, prompt_name=prompt_name, id_offset=id_offset, label=label)
     path.write_text(json.dumps({"fingerprint": fp, "pages": chunk.refs, "findings": findings}, indent=2),
                     encoding="utf-8")
     return findings
+
+
+_MDNA_START = re.compile(r"item\s*7\.?\s*management.{0,3}s\s+discussion", re.I)
+_MDNA_END = re.compile(r"item\s*7a\.?\s*quantitative", re.I)
+
+
+def mdna_pages(pages):
+    """
+    The MD&A section of a 10-K: from the 'Item 7. Management's Discussion' heading to
+    'Item 7A'. The table of contents lists both headings on one page, so skip any page that has both.
+    Returns all readable pages if no MD&A heading is found (e.g. a CIM).
+    """
+    readable = [p for p in pages if p.readable]
+    start = next((i for i, p in enumerate(readable)
+                  if _MDNA_START.search(p.text) and not _MDNA_END.search(p.text)), None)
+    if start is None:
+        return readable, "no MD&A heading found; narrative pass covers the whole document"
+    end = next((i for i in range(start + 1, len(readable)) if _MDNA_END.search(readable[i].text)),
+               min(start + 25, len(readable) - 1))
+    sel = readable[start:end + 1]
+    return sel, f"narrative pass covers MD&A, pp. {sel[0].ref}-{sel[-1].ref}"
 
 
 def _dedupe(findings: list[dict]) -> tuple[list[dict], int]:
@@ -76,6 +103,19 @@ def run_map(pdf: str, fresh: bool = False) -> MapResult:
     with ThreadPoolExecutor(max_workers=PARALLEL_CALLS) as pool:
         results = list(pool.map(lambda c: _extract_cached(c, cache_dir, fp, fresh), chunks))
     all_findings = [f for chunk_findings in results for f in chunk_findings]
+
+    # Focused second pass: every figure and explanation management states in MD&A.
+    # Feeds the consistency check (narrative vs. statements).
+    sel, note = mdna_pages(page_map.pages)
+    page_map.notes.append(f"MD&A {note}.")
+    print(f"Narrative pass: {note}")
+    narr_chunks = make_chunks(sel)
+    nfp = _fingerprint("extract_narrative.md")
+    with ThreadPoolExecutor(max_workers=PARALLEL_CALLS) as pool:
+        narr = list(pool.map(lambda c: _extract_cached(c, cache_dir, nfp, fresh, prefix="narrative",
+                                                       prompt_name="extract_narrative.md",
+                                                       id_offset=NARRATIVE_ID_OFFSET), narr_chunks))
+    all_findings += [f for chunk_findings in narr for f in chunk_findings]
 
     passed, rejected = verify(all_findings, page_map.by_ref())
     findings, dupes = _dedupe(passed)

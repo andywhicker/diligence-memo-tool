@@ -48,13 +48,19 @@ def load_prompt(name: str) -> str:
     return (config.PROMPTS_DIR / name).read_text(encoding="utf-8")
 
 
-def extract_chunk(chunk: Chunk) -> list[dict]:
-    prompt = (load_prompt("extract_findings.md")
+def extract_chunk(chunk: Chunk, prompt_name: str = "extract_findings.md", id_offset: int = 0,
+                  label: str = "extract chunk") -> list[dict]:
+    """
+    id_offset keeps IDs unique across passes: the main pass uses chunk numbers 1-50
+    (F08-012), the MD&A narrative pass uses 51+ (F51-004).
+    """
+    prompt = (load_prompt(prompt_name)
               .replace("{{PAGE_REFS}}", f"{chunk.refs[0]} to {chunk.refs[-1]}")
               .replace("{{CHUNK_TEXT}}", chunk.text))
-    raw = llm.ask(prompt, label=f"extract chunk {chunk.index}", schema=FINDINGS_SCHEMA)
+    # 64k output cap: number-dense pages (e.g. MD&A results tables) can need >32k with reasoning
+    raw = llm.ask(prompt, label=f"{label} {chunk.index}", schema=FINDINGS_SCHEMA, max_tokens=64000)
     findings = json.loads(raw)["findings"]
     for n, f in enumerate(findings, start=1):
-        f["id"] = f"F{chunk.index:02d}-{n:03d}"
-        f["chunk"] = chunk.index
+        f["id"] = f"F{chunk.index + id_offset:02d}-{n:03d}"
+        f["chunk"] = chunk.index + id_offset
     return findings

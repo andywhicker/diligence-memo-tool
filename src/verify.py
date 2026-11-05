@@ -54,6 +54,7 @@ _EXEMPT = [
     re.compile(r"\b(?:fy|q)\s?\d{1,4}\b", re.I),
     # descriptors, not figures: "top 10 customers", "Top-5", "(3)" item counts
     re.compile(r"\btop[\s-]?\d{1,2}\b", re.I),
+    re.compile(r"\b(?:10-k|10-q|8-k|s-1|def\s?14a)\b", re.I),     # SEC form names
     re.compile(r"\(\d\)"),
 ]
 

@@ -6,7 +6,7 @@ A command-line tool that reads a long investment document (a 10-K or a CIM) and 
 python diligence.py docs/AVAV_10-K_FY2026_clean.pdf
 ```
 
-Output: a styled Word memo, a matching PDF, and a Markdown copy. On AeroVironment's FY2026 10-K (138 pages), a full run takes about 13 minutes and costs about $5.75 in API usage. Re-rendering after a code change is free and takes about 30 seconds.
+Output: a styled Word memo, a matching PDF, and a Markdown copy. On AeroVironment's FY2026 10-K (138 pages), a full run takes about 20 minutes and costs about $7.25 in API usage. Re-rendering after a code change is free and takes about 30 seconds.
 
 ---
 
@@ -59,8 +59,8 @@ Each reported figure in the tables is marked **✓** if the same number for the 
  2. Chunk ──────────────── ~10 pages per chunk, 1-page overlap, each page tagged <page ref="65">
   │
   ▼
- 3. Extract (AI) ───────── per chunk: structured findings = claim, number, unit, period, page, exact quote
-  │
+ 3. Extract (AI) ───────── per chunk: structured findings = claim, number, unit, period, page, exact quote;
+  │                         plus a focused MD&A pass for every figure and explanation management states
   ▼
  4. Verify (code) ──────── reject any finding whose quote isn't on the cited page,
   │                         or whose numbers aren't in the quote
@@ -74,8 +74,9 @@ Each reported figure in the tables is marked **✓** if the same number for the 
  7. Enforce (code) ─────── delete any line citing a fake ID, an uncited number, or a number not in
   │                         its cited findings; convert IDs to (p. 65) citations
   ▼
- 8. Consistency (AI + code) narrative vs. numbers; kept only if both sides are cited and every
-  │                         number traces to a finding or a calculation
+ 8. Consistency ────────── code: same line item + year stated with values that can't both be right;
+  │                         AI pass 1, then AI pass 2 told what was found and asked for what was missed;
+  │                         AI items kept only if both sides are cited and every number traces back
   ▼
  9. Render ─────────────── Markdown → styled Word → PDF (exported by Word, so they match)
 ```
@@ -83,11 +84,16 @@ Each reported figure in the tables is marked **✓** if the same number for the 
 **The division of labor.** The model does what it's good at: reading, classifying, choosing the right figure, and writing. Code does what has to be exact: matching quotes, checking numbers, converting units, and calculating. The model never computes a number. It writes "organic growth was 26.4%" only by citing the code's calculation `[C-ORGANIC_GROWTH-FY2026]`, and the reader sees `(calc.; pp. 81, 116, 118)`.
 
 **Results on the AVAV FY2026 10-K:**
-- 951 findings extracted; 874 verified, 24 rejected, 53 duplicates from the page overlap removed.
+- 1,138 findings extracted (including 197 from the MD&A narrative pass); 1,045 verified, 28 rejected, 65 duplicates from the page overlap removed.
 - 64 metrics calculated by code.
-- 258 memo lines kept; 2 deleted by the citation check.
+- 227 memo lines kept; 1 deleted by the citation check.
 - 40 of 69 table inputs independently confirmed on a second page.
 - Calculated metrics match a hand calculation, e.g. FCF of $(140.9)M = OCF $(78.4)M − capex $62.5M, and organic growth of 26.4% vs. 140.9% reported.
+- Consistency check: 14 items (2 from the code check, 12 from the two AI passes; 8 more AI items failed the citation checks and were dropped). It catches all four issues found by manual review:
+  - FDII cited for the FY2026 tax rate, while the reconciliation shows no FY2026 FDII benefit (pp. 60, 111)
+  - UGV amortization of $4.6M in MD&A vs. $4.3M in the notes (pp. 33, 69)
+  - SG&A of $443.0M in MD&A vs. $443,251K on the income statement (pp. 65, 66), caught by code
+  - capex stated three different ways across MD&A, the cash flow statement and the segment note (pp. 72, 84, 125)
 
 ---
 
@@ -184,13 +190,12 @@ tools/html_to_pdf.ps1   EDGAR HTML -> page-aligned PDF
 Ranked by how much they matter for trusting the output.
 
 1. **The citation check confirms numbers, not meaning.** A memo line survives if its numbers appear in the findings it cites. A line could still cite a real finding and misstate it in words (e.g. "rose" when the figure fell, or the wrong segment). Sentences with no numbers only need a valid citation. *Fix planned:* a second, cheaper model checks that each line says what its cited finding says.
-2. **The consistency check is not repeatable.** Its checks control what gets kept, not what the model finds. On AVAV, one run caught that Item 5 attributes the low FY2026 tax rate partly to the FDII deduction while the tax reconciliation shows no FDII benefit that year (pp. 60, 111); a later run did not. A $443.0M vs. $443.3M SG&A mismatch between MD&A and the income statement has not been caught. *Fix planned:* run it twice and merge, and add code-only checks for the same metric reported with different values on different pages.
-3. **Narrative extraction is thin.** Only 26 of 874 AVAV findings are management's explanations of why a metric moved. That's the raw material for the consistency check.
-4. **Year and unit checks are strongest in the tables.** Table inputs are cross-checked against a second page (✓/†). Numbers in the memo text are checked against a finding, but a finding with the wrong year attached would pass. Extraction captures unit labels ("$ thousands") from the page, but nothing confirms them independently.
-5. **The model can miss table inputs.** On AVAV it did not pick up the FY2025 goodwill impairment ($18.4M), so one FY2025 metric shows n/a. A gap shows as "Not disclosed" or "n/a", never as an invented number, but some gaps are misses rather than true non-disclosure.
-6. **Some correct findings are rejected.** Product names containing numbers (e.g. "Puma 3", "VAPOR 55") can trip the number check. About 4 of the 24 AVAV rejections are this kind of false positive.
-7. **Document scope.** Tested on one EDGAR 10-K. Not yet tested on a CIM. Scanned or image-only PDFs aren't supported. Printed page numbers are detected from page footers; documents without them are cited by PDF page ("PDF 12"). PDF text extraction flattens tables into rows of numbers, so column alignment has to be inferred.
-8. **Data handling.** Document text is sent to Anthropic's API. Don't run confidential documents (e.g. a CIM under NDA) without authorization from whoever controls them.
+2. **The AI part of the consistency check still varies between runs.** The code layer is deterministic, but it only compares line items it can name with confidence (revenue, SG&A, capex, operating cash flow and similar). Everything else depends on the two AI passes. Before the second pass and the MD&A narrative pass were added, one run caught the FDII issue and the next didn't. The current version catches all four known issues, but repeatability across fresh runs hasn't been measured; that would cost about $1.30 per trial.
+3. **Year and unit checks are strongest in the tables.** Table inputs are cross-checked against a second page (✓/†). Numbers in the memo text are checked against a finding, but a finding with the wrong year attached would pass. Extraction captures unit labels ("$ thousands") from the page, but nothing confirms them independently.
+4. **The model can miss table inputs.** On AVAV it did not pick up the FY2025 goodwill impairment ($18.4M), so one FY2025 metric shows n/a. A gap shows as "Not disclosed" or "n/a", never as an invented number, but some gaps are misses rather than true non-disclosure.
+5. **Some correct findings are rejected.** Product names containing numbers (e.g. "Puma 3", "VAPOR 55") can trip the number check. About 4 of the 24 AVAV rejections are this kind of false positive.
+6. **Document scope.** Tested on one EDGAR 10-K. Not yet tested on a CIM. Scanned or image-only PDFs aren't supported. Printed page numbers are detected from page footers; documents without them are cited by PDF page ("PDF 12"). PDF text extraction flattens tables into rows of numbers, so column alignment has to be inferred.
+7. **Data handling.** Document text is sent to Anthropic's API. Don't run confidential documents (e.g. a CIM under NDA) without authorization from whoever controls them.
 
 **Out of scope for v1:** web interface, database, multi-document comparison, valuation and returns. Valuation is v2: an Excel LBO built from the Section 5 tables and the Section 7 inputs, with your assumptions as toggles.
 
@@ -201,10 +206,11 @@ Ranked by how much they matter for trusting the output.
 | Step | API calls | Cost |
 |---|---|---|
 | Extraction (16 chunks) | 16 | $3.96 |
+| MD&A narrative pass (2 chunks) | 2 | $0.81 |
 | Table inputs | 1 | $0.34 |
-| Memo draft | 1 | $0.87 |
-| Consistency check | 1 | $0.55 |
-| **Full run** | **19** | **~$5.75** |
+| Memo draft | 1 | $0.86 |
+| Consistency check (2 AI passes; code check is free) | 2 | $1.27 |
+| **Full run** | **22** | **~$7.25** |
 | Re-render with unchanged inputs | 0 | $0 |
 
 Switching `MODEL` in `config.py` to `claude-sonnet-5-5` roughly halves the cost. Accuracy at the cheaper setting hasn't been measured yet.
