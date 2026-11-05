@@ -16,17 +16,34 @@ from datetime import date
 from pathlib import Path
 
 import config
-from src import excel_com, lbo_model
+from src import consensus, excel_com, lbo_model
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Build the Excel LBO from lbo_inputs.json (written by diligence.py).")
     ap.add_argument("inputs", help="path to output/<doc>/lbo_inputs.json")
+    ap.add_argument("--consensus", metavar="CSV", help="consensus estimates file (public companies)")
+    ap.add_argument("--consensus-template", metavar="CSV",
+                    help="write a blank consensus file to fill in, then exit")
     ap.add_argument("--no-excel", action="store_true", help="skip the Excel recalculation check")
     args = ap.parse_args()
 
     data = json.loads(Path(args.inputs).read_text(encoding="utf-8"))
     slug = re.sub(r"[^A-Za-z0-9]+", "_", data["company"]).strip("_")
+
+    last = int(data["years"][-1][-4:])
+    if args.consensus_template:
+        consensus.write_template(Path(args.consensus_template), data["company"],
+                                 [f"FY{last + i}" for i in range(1, 6)])
+        print(f"Wrote {args.consensus_template}. Fill it from Capital IQ, FactSet or WRDS, then run with --consensus.")
+        return
+    if args.consensus:
+        data["consensus"] = consensus.read(Path(args.consensus))
+        c = data["consensus"]
+        print(f"Consensus: {len(c['by_year'])} years from {c['file']}"
+              + (" [TEST ONLY: not real consensus]" if c["test_only"] else ""))
+        for p in c["problems"]:
+            print(f"  [warn] {p}")
     out = config.OUTPUT_DIR / f"{slug}_LBO_{date.today().isoformat()}.xlsx"
 
     m = lbo_model.build(data, out)

@@ -37,9 +37,13 @@ LBO_SLOTS = {
     "stock_based_comp": ("Stock-based compensation", "money"),
     "acquisition_costs": ("Acquisition-related expenses (company add-back)", "money"),
     "revolver_commitment": ("Revolver commitment", "money"),
+    "proj_revenue": ("Management projected revenue", "money"),
+    "proj_adj_ebitda": ("Management projected adjusted EBITDA", "money"),
+    "proj_capex": ("Management projected capex", "money"),
 }
+PROJECTION_SLOTS = {"proj_revenue", "proj_adj_ebitda", "proj_capex"}
 POSITIVE = {"cash_taxes_paid", "interest_expense", "stock_based_comp", "acquisition_costs",
-            "accounts_payable", "accrued_liabilities", "contract_liabilities"}
+            "accounts_payable", "accrued_liabilities", "contract_liabilities", "proj_capex"}
 
 _PICK = {"type": "object", "properties": {"finding_id": {"type": "string"}, "number": {"type": "string"}},
          "required": ["finding_id", "number"], "additionalProperties": False}
@@ -114,9 +118,12 @@ def export(path, company: str, pdf: str, findings: list[dict], table, lbo_cells,
         inputs.setdefault(slot, {})[year] = _cell_json(cell, table.labels[slot], by_id)
     for (slot, year), cell in lbo_cells.items():
         inputs.setdefault(slot, {})[year] = _cell_json(cell, LBO_SLOTS[slot][0], by_id)
+    proj_years = sorted({y for (s, y) in lbo_cells if s in PROJECTION_SLOTS})
     data = {
         "company": company, "source_document": pdf, "generated": date.today().isoformat(),
         "years": table.years,
+        "projection_years": proj_years,           # years with management projections (usually CIMs only)
+        "is_public": ("share_price", table.years[-1]) in lbo_cells or any(s == "share_price" for s, _ in lbo_cells),
         "inputs": inputs,
         "notes": lbo_notes + table.notes,
         "problems": lbo_problems + table.problems,

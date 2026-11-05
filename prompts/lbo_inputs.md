@@ -28,6 +28,14 @@ Income statement items used in the EBITDA bridge (for each fiscal year):
 Capital structure (latest):
 - `revolver_commitment`: total revolving credit facility commitment
 
+Management projections (for each PROJECTED fiscal year the document gives; typical in a CIM, rare in a 10-K):
+- `proj_revenue`: management's projected revenue
+- `proj_adj_ebitda`: management's projected adjusted EBITDA
+- `proj_capex`: management's projected capital expenditures
+Use these only for explicit multi-year projections or a management case. Do NOT use backlog conversion
+statements, qualitative outlook, or single-line guidance ranges. Label each with its projected fiscal year
+(e.g. "FY2027"), even though it is after the last actual year.
+
 ## Rules
 
 1. **Columns.** Use fiscal-year labels like "FY2025", "FY2026", the company's own fiscal-year naming. For point-in-time items dated after the last fiscal year end (e.g. shares on the cover page), use the most recent fiscal year label.
