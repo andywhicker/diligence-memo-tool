@@ -217,3 +217,9 @@ Ranked by how much they matter for trusting the output.
 | Re-render with unchanged inputs | 0 | $0 |
 
 Switching `MODEL` in `config.py` to `claude-sonnet-5-5` roughly halves the cost. Accuracy at the cheaper setting hasn't been measured yet.
+
+---
+
+## License
+
+MIT. See [LICENSE](LICENSE). The sample memo in `samples/` is derived from AeroVironment's public FY2026 Form 10-K and is provided for illustration only; it is not investment advice.
