@@ -18,7 +18,7 @@ from pathlib import Path
 import config
 from src import llm
 from src.chunker import make_chunks
-from src import consistency, fintable, render
+from src import consistency, fintable, lbo_inputs, render
 from src.citations import enforce
 from src.synthesize import write_draft
 from src.extract import extract_chunk
@@ -173,6 +173,14 @@ def full_run(pdf: str, fresh: bool) -> None:
     # ---- Step 7: deliverables (Markdown + Word + PDF) at the top of output/ ----
     title = next((l for l in memo.splitlines() if l.startswith("# ")), "# Memo")
     company = title.split(":", 1)[-1].strip() if ":" in title else Path(pdf).stem
+
+    # ---- Inputs for the v2 Excel LBO (lbo.py): every value with page cites ----
+    print("\nGathering LBO inputs...")
+    lbo_cells, lbo_notes, lbo_problems = lbo_inputs.build(m.findings, cache_file=cache / "lbo_inputs.json")
+    lbo_inputs.export(m.out_dir / "lbo_inputs.json", company, pdf, m.findings, table,
+                      lbo_cells, lbo_notes, lbo_problems)
+    print(f"  {len(lbo_cells)} LBO-specific inputs; {len(lbo_problems)} picks rejected. "
+          f"Saved: {m.out_dir / 'lbo_inputs.json'}")
     base = config.OUTPUT_DIR / f"{re.sub(r'[^A-Za-z0-9]+', '_', company).strip('_')}_Diligence_Memo_{date.today().isoformat()}"
     base.with_suffix(".md").write_text(memo, encoding="utf-8")
     docx_path = render.to_docx(memo, base.with_suffix(".docx"))

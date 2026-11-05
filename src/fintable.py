@@ -161,6 +161,8 @@ def _parse(number: str, unit: str, kind: str):
         x = -x
     if kind == "count":
         return x, "count"
+    if kind == "price":                       # dollars per share, kept as written
+        return x, "price"
     u, n = (unit or "").lower(), number.lower()
     if "%" in number or ("%" in u and "$" not in u) or "percent" in u:
         return x, "pct"
@@ -212,6 +214,8 @@ def fmt(value: float, kind: str) -> str:
         return f"${value:.2f}"
     if kind == "count":
         return f"{value:,.0f}"
+    if kind == "price":
+        return f"${value:,.2f}"
     return f"({abs(value):,.1f})" if value < 0 else f"{value:,.1f}"
 
 
