@@ -1,0 +1,13 @@
+# Secrets: never commit
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Generated memos and run logs
+output/
+
+# Source documents (large; may be confidential, e.g. CIMs)
+docs/
