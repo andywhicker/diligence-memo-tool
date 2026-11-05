@@ -45,16 +45,24 @@ def _bare_number(s: str) -> str:
 
 
 _NUMBER = re.compile(r"\d[\d,]*(?:\.\d+)?")
-_EXEMPT = re.compile(r"\b(?:asc|asu|topic|item|section|rule|note)\s+[\d\-]+", re.I)
+_EXEMPT = [
+    # accounting-standard and document references: "ASC 606", "Item 7", "Note 12"
+    re.compile(r"\b(?:asc|asu|topic|item|section|rule|note)\s+[\d\-]+", re.I),
+    # dates: "April 30, 2026", "May 1" (the day number is not a financial figure)
+    re.compile(r"\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{1,2}(?:st|nd|rd|th)?\b", re.I),
+    # period labels: "FY2026", "FY26", "Q3"
+    re.compile(r"\b(?:fy|q)\s?\d{1,4}\b", re.I),
+]
 
 
 def _unverified_claim_numbers(claim: str, quote_norm: str) -> list[str]:
     """Numbers in the claim sentence that do not appear in the quote."""
-    claim = _EXEMPT.sub(" ", claim)
+    for pattern in _EXEMPT:
+        claim = pattern.sub(" ", claim)
     quote_digits = quote_norm.replace(",", "")
     missing = []
     for n in _NUMBER.findall(claim):
-        bare = n.replace(",", "")
+        bare = n.replace(",", "").rstrip(".")
         if re.fullmatch(r"(19|20)\d\d", bare):     # years
             continue
         if bare not in quote_digits:

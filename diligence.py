@@ -10,6 +10,7 @@ Usage:
 import argparse
 import json
 import sys
+import time
 from pathlib import Path
 
 import config
@@ -17,6 +18,7 @@ from src import llm
 from src.chunker import make_chunks
 from src.extract import extract_chunk
 from src.pdf_pages import load_pages
+from src.pipeline import run_map
 from src.verify import verify
 
 
@@ -81,6 +83,7 @@ def main() -> None:
     parser.add_argument("--check", action="store_true", help="test the API connection and exit")
     parser.add_argument("--dry-run", action="store_true", help="read and chunk the PDF only; no API calls")
     parser.add_argument("--chunk", type=int, metavar="N", help="extract + verify chunk N only (for testing)")
+    parser.add_argument("--fresh", action="store_true", help="ignore saved chunk results and re-extract everything")
     args = parser.parse_args()
 
     if args.check:
@@ -95,7 +98,26 @@ def main() -> None:
     if args.chunk:
         run_one_chunk(args.pdf, args.chunk)
         return
-    sys.exit("Full pipeline not built yet (steps 2-7).")
+    full_run(args.pdf, fresh=args.fresh)
+
+
+def full_run(pdf: str, fresh: bool) -> None:
+    started = time.time()
+    print(f"Model: {config.MODEL} | effort: {config.EFFORT}")
+    m = run_map(pdf, fresh=fresh)
+
+    from collections import Counter
+    cats = Counter(f["category"] for f in m.findings)
+    reasons = Counter(r["reject_reason"].split(" '")[0].split(" [")[0] for r in m.rejected)
+    print(f"\nVerified findings: {len(m.findings)} "
+          f"(rejected {len(m.rejected)}, overlap duplicates removed {m.duplicates_removed})")
+    print("By category: " + ", ".join(f"{k} {v}" for k, v in sorted(cats.items())))
+    if reasons:
+        print("Rejection reasons: " + ", ".join(f"{k}: {v}" for k, v in reasons.most_common()))
+    print(f"Saved: {m.out_dir / 'findings.json'} and rejected.json")
+
+    print("\nMemo synthesis not built yet (step 5).")
+    print(f"\n{llm.tracker.summary()} | time: {time.time() - started:.0f}s")
 
 
 if __name__ == "__main__":
