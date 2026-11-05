@@ -11,11 +11,14 @@ import argparse
 import json
 import sys
 import time
+from datetime import date
 from pathlib import Path
 
 import config
 from src import llm
 from src.chunker import make_chunks
+from src.citations import enforce
+from src.synthesize import write_draft
 from src.extract import extract_chunk
 from src.pdf_pages import load_pages
 from src.pipeline import run_map
@@ -84,6 +87,8 @@ def main() -> None:
     parser.add_argument("--dry-run", action="store_true", help="read and chunk the PDF only; no API calls")
     parser.add_argument("--chunk", type=int, metavar="N", help="extract + verify chunk N only (for testing)")
     parser.add_argument("--fresh", action="store_true", help="ignore saved chunk results and re-extract everything")
+    parser.add_argument("--reuse-draft", action="store_true",
+                        help="re-run the citation check on the saved draft instead of writing a new one")
     args = parser.parse_args()
 
     if args.check:
@@ -98,10 +103,10 @@ def main() -> None:
     if args.chunk:
         run_one_chunk(args.pdf, args.chunk)
         return
-    full_run(args.pdf, fresh=args.fresh)
+    full_run(args.pdf, fresh=args.fresh, reuse_draft=args.reuse_draft)
 
 
-def full_run(pdf: str, fresh: bool) -> None:
+def full_run(pdf: str, fresh: bool, reuse_draft: bool = False) -> None:
     started = time.time()
     print(f"Model: {config.MODEL} | effort: {config.EFFORT}")
     m = run_map(pdf, fresh=fresh)
@@ -116,7 +121,41 @@ def full_run(pdf: str, fresh: bool) -> None:
         print("Rejection reasons: " + ", ".join(f"{k}: {v}" for k, v in reasons.most_common()))
     print(f"Saved: {m.out_dir / 'findings.json'} and rejected.json")
 
-    print("\nMemo synthesis not built yet (step 5).")
+    # ---- Step 5: write the memo from verified findings, then enforce citations ----
+    draft_path = m.out_dir / "draft_raw.md"
+    if reuse_draft and draft_path.exists():
+        print("\nReusing saved draft (no API call).")
+        draft = draft_path.read_text(encoding="utf-8")
+    else:
+        print("\nWriting memo from verified findings...")
+        draft = write_draft(m.findings)
+        draft_path.write_text(draft, encoding="utf-8")
+
+    memo, report = enforce(draft, m.findings)
+
+    pages = m.page_map.pages
+    readable = sum(1 for p in pages if p.readable)
+    coverage = list(m.page_map.notes) + [
+        f"{readable} of {len(pages)} PDF pages had extractable text and were analyzed.",
+        f"{len(m.findings)} findings verified against the source; {len(m.rejected)} rejected "
+        f"(quote or number not found on the cited page). See rejected.json.",
+        f"{len(report.deleted)} memo lines deleted by the citation check (no valid citation or "
+        f"unsupported number). See citation_log.md.",
+    ]
+    memo = (memo.replace("{{RUN_DATE}}", date.today().isoformat())
+                .replace("{{PAGES_PROCESSED}}", f"{readable} of {len(pages)} PDF pages")
+                .replace("{{COVERAGE_NOTES}}", "\n".join(f"- {c}" for c in coverage))
+                .replace("{{FINANCIAL_TABLE}}", "_[Financial table: built in step 6]_")
+                .replace("{{CONSISTENCY_CHECK}}", "_[Consistency check: built in step 6]_"))
+
+    memo_path = m.out_dir / "memo.md"
+    memo_path.write_text(memo, encoding="utf-8")
+    log_lines = [f"# Citation log\n\nKept {report.kept} lines; deleted {len(report.deleted)}.\n"]
+    log_lines += [f"- **{reason}**\n  > {line}" for line, reason in report.deleted]
+    (m.out_dir / "citation_log.md").write_text("\n".join(log_lines), encoding="utf-8")
+
+    print(f"Citation check: kept {report.kept} lines, deleted {len(report.deleted)}")
+    print(f"Memo: {memo_path}")
     print(f"\n{llm.tracker.summary()} | time: {time.time() - started:.0f}s")
 
 
