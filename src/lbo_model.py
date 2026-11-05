@@ -5,7 +5,7 @@ Python writes inputs and FORMULAS; Excel does all the math, so every number
 recalculates when you change an assumption.
 
 Conventions (standard for banking/PE models):
-  blue text   = hardcoded input (sourced from the 10-K, or your assumption)
+  blue text   = hardcoded input (sourced from the filing or CIM, or your assumption)
   black text  = formula
   green text  = formula that pulls from another tab
   yellow fill = key assumption / placeholder you should set
@@ -410,7 +410,8 @@ def build_assumptions(wb, data: dict, m: Model, n_years: int = 5):
     ws = wb.create_sheet("Assumptions")
     title(ws, "Assumptions: change the blue cells; yellow = placeholder you should set",
           "Nothing on this tab comes from the filing unless the Basis column says so. "
-          "The 10-K has no management projections, so the operating case is yours.")
+          + ("The operating case is yours; the Management / Consensus case is on the Cases tab." if m.case
+             else "The source document has no management projections, so the operating case is yours."))
     H = "Historicals"
     hr, L = m.hist, m.last_hist_col
     last_year = int(data["years"][-1][-4:])
@@ -462,8 +463,8 @@ def build_assumptions(wb, data: dict, m: Model, n_years: int = 5):
         "(The premium method does not apply.)")
     dropdown("C9", ["Premium to share price", "EV / EBITDA multiple"])
     put(10, "premium", "Offer premium to share price", 0.30, "pct", "Placeholder: your call (take-private premiums are often 20-40%).")
-    put(11, "entry_multiple", "Entry EV / EBITDA (if multiple method)", 22.0, "x",
-        "Placeholder: your call. Market multiple today is on the Historicals tab.")
+    put(11, "entry_multiple", "Entry EV / EBITDA (if multiple method)", 22.0 if public else 12.0, "x",
+        "Placeholder: your call." + (" Market multiple today is on the Historicals tab." if public else ""))
     put(12, "ebitda_basis", "EBITDA basis for valuation and leverage (dropdown)", "Company adj. EBITDA", None,
         "Company figure as reported, or diligence-adjusted (bridge tab, step 3).")
     dropdown("C12", ["Company adj. EBITDA", "Diligence-adjusted EBITDA"])
@@ -474,7 +475,7 @@ def build_assumptions(wb, data: dict, m: Model, n_years: int = 5):
     put(15, "fin_fees", "Financing fees (% of new debt)", 0.025, "pct", "Placeholder: your call.")
     put(16, "min_cash", "Minimum cash on balance sheet ($M)", 100.0, "money", "Placeholder: your call.")
     put(17, "existing_debt", "Existing debt repaid at close ($M)", f"={H}!{L}{hr['total_debt']}", "money",
-        "Linked to Historicals: convertible notes repaid at principal on a change of control (check the indenture).",
+        "Linked to Historicals: existing debt repaid at close (check change-of-control and prepayment terms).",
         placeholder=False, color=GREEN)
 
     # financing
@@ -537,7 +538,7 @@ def build_assumptions(wb, data: dict, m: Model, n_years: int = 5):
     drivers = [
         ("growth", "Revenue growth", "pct",
          [[0.12, 0.10, 0.09, 0.08, 0.07], [0.16, 0.14, 0.12, 0.10, 0.09], [0.06, 0.05, 0.05, 0.04, 0.04]],
-         "Placeholder: your call. For reference, FY2026 organic growth was ~26% (memo, calc.)."),
+         "Placeholder: your call. For reference, see organic growth in the memo's Section 5 (calc.)."),
         ("margin", "Adj. EBITDA margin", "pct",
          [[margin, margin + .005, margin + .01, margin + .015, margin + .02],
           [margin + .005, margin + .015, margin + .025, margin + .03, margin + .035],
@@ -615,7 +616,7 @@ def build_guide(wb, data: dict, m: Model):
         ("How to use", None),
         ("1. Pick a scenario and set the yellow cells on the Assumptions tab.", None),
         ("2. Historical figures come from the filing; hover over any blue number on Historicals for the exact quote and page.", None),
-        ("3. The 10-K has no management case: every projection driver is your assumption.", None),
+        ("3. Projection drivers are your assumptions, except the Management / Consensus case (Cases tab) when one is provided.", None),
         ("", None),
         ("Color legend", None),
         ("Blue text: hardcoded input (from the filing, or your assumption)", BLUE),
@@ -665,7 +666,7 @@ def build_bridge(wb, data: dict, m: Model):
         (7, "Stock-based compensation", "stock_based_comp", "Keep",
          "Non-cash, but a real cost to equity holders; many sponsors deduct it."),
         (8, "Acquisition-related expenses", "acquisition_costs", "Deduct",
-         "Recurred in FY2025 and FY2026; the memo flags it as recurring for a serial acquirer."),
+         "Deduct if these recur; the memo's QoE section shows whether they do."),
     ]
     for row, text, slot, default, why in items:
         label(row, f"Less: {text}")
