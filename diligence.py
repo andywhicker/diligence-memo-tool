@@ -17,6 +17,7 @@ from pathlib import Path
 import config
 from src import llm
 from src.chunker import make_chunks
+from src import consistency, fintable
 from src.citations import enforce
 from src.synthesize import write_draft
 from src.extract import extract_chunk
@@ -88,7 +89,8 @@ def main() -> None:
     parser.add_argument("--chunk", type=int, metavar="N", help="extract + verify chunk N only (for testing)")
     parser.add_argument("--fresh", action="store_true", help="ignore saved chunk results and re-extract everything")
     parser.add_argument("--reuse-draft", action="store_true",
-                        help="re-run the citation check on the saved draft instead of writing a new one")
+                        help="reuse the saved memo draft, financial table and consistency check model outputs "
+                             "(re-runs all code checks, no API cost)")
     args = parser.parse_args()
 
     if args.check:
@@ -133,6 +135,20 @@ def full_run(pdf: str, fresh: bool, reuse_draft: bool = False) -> None:
 
     memo, report = enforce(draft, m.findings)
 
+    # ---- Step 6: financial table (model picks cells, code computes/checks) + consistency check ----
+    print("\nBuilding financial table...")
+    table = fintable.build(m.findings, cache_path=m.out_dir / "table_raw.json", reuse=reuse_draft)
+    table_md, table_checks = fintable.render(table)
+    notes_md, notes_report = enforce("\n".join(f"- {n}" for n in table.notes), m.findings)
+    report.deleted += [(l, f"[table note] {r}") for l, r in notes_report.deleted]
+    fin_block = "\n".join([table_md, "", *[f"- {c}" for c in table_checks],
+                           *([notes_md] if notes_md.strip() else [])])
+
+    print("Running consistency check...")
+    consistency_md, dropped = consistency.run(m.findings, table.calcs,
+                                              cache_path=m.out_dir / "consistency_raw.json", reuse=reuse_draft)
+    report.deleted += [(l, f"[consistency item] {r}") for l, r in dropped]
+
     pages = m.page_map.pages
     readable = sum(1 for p in pages if p.readable)
     coverage = list(m.page_map.notes) + [
@@ -145,8 +161,8 @@ def full_run(pdf: str, fresh: bool, reuse_draft: bool = False) -> None:
     memo = (memo.replace("{{RUN_DATE}}", date.today().isoformat())
                 .replace("{{PAGES_PROCESSED}}", f"{readable} of {len(pages)} PDF pages")
                 .replace("{{COVERAGE_NOTES}}", "\n".join(f"- {c}" for c in coverage))
-                .replace("{{FINANCIAL_TABLE}}", "_[Financial table: built in step 6]_")
-                .replace("{{CONSISTENCY_CHECK}}", "_[Consistency check: built in step 6]_"))
+                .replace("{{FINANCIAL_TABLE}}", fin_block)
+                .replace("{{CONSISTENCY_CHECK}}", consistency_md))
 
     memo_path = m.out_dir / "memo.md"
     memo_path.write_text(memo, encoding="utf-8")

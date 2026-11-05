@@ -48,13 +48,14 @@ def _number_forms(f: dict) -> set[str]:
             except ValueError:
                 continue
             unit = (f.get("unit") or "").lower()
+            # divisors converting the stated unit to other common units (<1 means multiply)
             scales = []
             if "thousand" in unit:
-                scales = [1e3, 1e6]                 # -> millions, billions
+                scales = [1e3, 1e6, 1e-3]           # -> millions, billions, raw dollars
             elif unit.strip() in ("$", "usd", "dollars"):
-                scales = [1e6, 1e9]
+                scales = [1e3, 1e6, 1e9]            # -> thousands, millions, billions
             elif "million" in unit:
-                scales = [1e3]                      # -> billions
+                scales = [1e3, 1e-3]                # -> billions, thousands
             for s in scales:
                 for dp in (0, 1, 2):
                     forms.add(f"{x / s:.{dp}f}")
@@ -103,7 +104,16 @@ def _page_cite(ids: list[str], by_id: dict) -> str:
     return f"(p. {pages[0]})" if len(pages) == 1 else f"(pp. {', '.join(pages)})"
 
 
+def normalize_id_brackets(text: str) -> str:
+    """'[F14-038, F14-036]' -> '[F14-038][F14-036]' (models sometimes group IDs in one bracket)."""
+    def split(m):
+        ids = re.findall(r"F\d{2}-\d{3}", m.group(0))
+        return "".join(f"[{i}]" for i in ids)
+    return re.sub(r"\[\s*F\d{2}-\d{3}(?:\s*[,;]\s*F\d{2}-\d{3})+\s*\]", split, text)
+
+
 def enforce(draft: str, findings: list[dict]) -> tuple[str, CitationReport]:
+    draft = normalize_id_brackets(draft)
     by_id = {f["id"]: f for f in findings}
     report = CitationReport()
     out_lines = []
