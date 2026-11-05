@@ -432,7 +432,9 @@ def build_guide(wb, data: dict, m: Model):
         ("Yellow fill: key assumption or placeholder to set", "fill"),
         ("", None),
         ("Status", None),
-        ("Tabs in this version: Guide, Historicals, Assumptions. Sources & Uses, Model, Returns and Checks come next.", None),
+        ("Tabs in this version: Guide, Historicals, Assumptions, Bridge, Sources & Uses, Model. Returns and Checks come next.", None),
+        ("Model simplifications: interest on beginning-of-year balances (no circular reference); depreciation excludes "
+         "acquired-intangible amortization (understates the tax shield); NOLs offset taxable income without annual limits.", None),
     ]
     for i, (text, style) in enumerate(rows, start=4):
         c = ws.cell(row=i, column=1, value=text)
@@ -449,11 +451,274 @@ def build_guide(wb, data: dict, m: Model):
     return ws
 
 
+# ---- EBITDA bridge --------------------------------------------------------------
+def build_bridge(wb, data: dict, m: Model):
+    """Company adj. EBITDA -> diligence-adjusted EBITDA, one toggle per add-back."""
+    ws = wb.create_sheet("Bridge")
+    fy = data["years"][-1]
+    H, L, hr = "Historicals", m.last_hist_col, m.hist
+    title(ws, f"EBITDA bridge, {fy}: company figure to diligence view ($ in millions)",
+          "For each company add-back, choose Keep (accept it) or Deduct (treat it as a real, recurring cost). "
+          "The EBITDA basis dropdown on Assumptions decides which figure drives valuation and leverage.")
+    header_row(ws, 4, ["Item", "", "Treatment", "Company add-back", "Applied"])
+
+    def label(row, text, bold=False, color=BLACK):
+        ws.cell(row=row, column=1, value=text).font = font(color, bold=bold)
+
+    label(5, f"Adjusted EBITDA as reported by company ({fy})", bold=True)
+    cell(ws, "E5", f"={H}!{L}{hr['adjusted_ebitda']}", "money", GREEN, bold=True)
+
+    items = [
+        (7, "Stock-based compensation", "stock_based_comp", "Keep",
+         "Non-cash, but a real cost to equity holders; many sponsors deduct it."),
+        (8, "Acquisition-related expenses", "acquisition_costs", "Deduct",
+         "Recurred in FY2025 and FY2026; the memo flags it as recurring for a serial acquirer."),
+    ]
+    for row, text, slot, default, why in items:
+        label(row, f"Less: {text}")
+        c = cell(ws, f"C{row}", default, None, BLUE, fill=YELLOW)
+        dv = DataValidation(type="list", formula1='"Keep,Deduct"', allow_blank=False)
+        ws.add_data_validation(dv)
+        dv.add(c)
+        cell(ws, f"D{row}", f"=-N({H}!{L}{hr[slot]})", "money", GREEN)
+        cell(ws, f"E{row}", f'=IF(C{row}="Deduct",D{row},0)', "money")
+        n = ws.cell(row=row, column=6, value=why)
+        n.font = font(GRAY, italic=True, size=8)
+        m.placeholders.append(f"Bridge: {text}")
+    label(9, "Other diligence adjustment (+ / -)")
+    cell(ws, "E9", 0.0, "money", BLUE, fill=YELLOW)
+    ws.cell(row=9, column=6, value="Placeholder: e.g. pro forma cost savings or QoE findings.").font = font(GRAY, italic=True, size=8)
+
+    label(11, f"Diligence-adjusted EBITDA ({fy})", bold=True)
+    x = cell(ws, "E11", "=E5+SUM(E7:E9)", "money", BLACK, bold=True)
+    x.border = Border(top=THIN)
+    label(12, "Adjustments as % of revenue (carried into projections)")
+    cell(ws, "E12", f"=IF(N({H}!{L}{hr['revenue']})=0,0,(E11-E5)/{H}!{L}{hr['revenue']})", "pct")
+    label(14, "EBITDA used for valuation and leverage (per Assumptions)", bold=True, color=NAVY)
+    s = cell(ws, "E14", f'=IF({m.a["ebitda_basis"]}="Company adj. EBITDA",E5,E11)', "money", BLACK, bold=True)
+    s.fill = PatternFill("solid", fgColor=BAND)
+    cell(ws, "C14", f"={m.a['ebitda_basis']}", None, GREEN)
+    m.a["ltm_ebitda"] = "Bridge!$E$14"
+    m.a["company_ebitda"] = "Bridge!$E$5"
+    m.a["adj_pct_rev"] = "Bridge!$E$12"
+    ws.column_dimensions["A"].width = 58
+    ws.column_dimensions["B"].width = 2
+    ws.column_dimensions["C"].width = 26
+    ws.column_dimensions["D"].width = 18
+    ws.column_dimensions["E"].width = 14
+    ws.column_dimensions["F"].width = 80
+    return ws
+
+
+# ---- Sources & Uses ----------------------------------------------------------------
+SU = "'Sources & Uses'"
+
+
+def build_sources_uses(wb, data: dict, m: Model):
+    ws = wb.create_sheet("Sources & Uses")
+    H, L, hr, a = "Historicals", m.last_hist_col, m.hist, m.a
+    title(ws, f"Sources & uses at close ({data['years'][-1]} year end, $ in millions)",
+          "Entry valuation follows the method chosen on Assumptions. Sponsor equity is the plug.")
+
+    def line(row, text, f, kind="money", color=BLACK, bold=False, key=None, note=None):
+        ws.cell(row=row, column=1, value=text).font = font(bold=bold)
+        c = cell(ws, f"C{row}", f, kind, color, bold=bold)
+        if note:
+            ws.cell(row=row, column=4, value=note).font = font(GRAY, italic=True, size=8)
+        if key:
+            a[key] = f"{SU}!$C${row}"
+        return c
+
+    section(ws, 4, "Entry valuation", 4)
+    line(5, "EBITDA used (Bridge)", f"={a['ltm_ebitda']}", color=GREEN, key="su_ebitda")
+    line(6, "Current share price", f"={H}!{L}{hr['share_price']}", "price", GREEN)
+    line(7, "Offer price per share", f"=C6*(1+{a['premium']})", "price")
+    line(8, "Diluted shares (millions)", f"={H}!{L}{hr['shares_outstanding']}/1000000*(1+{a['dilution']})", "money",
+         note="Basic shares x (1 + dilution assumption)")
+    line(9, "Existing debt", f"={a['existing_debt']}", color=GREEN)
+    line(10, "Less: cash and short-term investments", f"=-({H}!{L}{hr['cash']}+N({H}!{L}{hr['short_term_investments']}))",
+         color=GREEN)
+    line(11, "Equity value (premium method)", "=C7*C8")
+    line(12, "Enterprise value (premium method)", "=C11+C9+C10")
+    line(13, "Enterprise value (multiple method)", f"={a['entry_multiple']}*C5")
+    line(14, "Equity value (multiple method)", "=C13-C9-C10")
+    is_prem = f'{a["entry_method"]}="Premium to share price"'
+    line(16, "Enterprise value (selected method)", f"=IF({is_prem},C12,C13)", bold=True, key="entry_ev")
+    line(17, "Equity purchase price (selected method)", f"=IF({is_prem},C11,C14)", bold=True, key="equity_price")
+    line(18, "Implied EV / EBITDA", '=IF(C5<=0,"n/a",C16/C5)', "x", key="implied_multiple")
+    line(19, "Implied premium to current share price", '=IF(C6*C8=0,"n/a",C17/(C6*C8)-1)', "pct")
+
+    section(ws, 21, "Uses", 4)
+    line(22, "Purchase of equity", "=C17")
+    line(23, "Repay existing debt", "=C9")
+    line(24, "Transaction fees", f"={a['txn_fees']}*C16")
+    line(25, "Financing fees", f"={a['fin_fees']}*(C31+C32)")
+    line(26, "Cash to balance sheet (minimum cash)", f"={a['min_cash']}", color=GREEN)
+    t = line(27, "Total uses", "=SUM(C22:C26)", bold=True, key="total_uses")
+    t.border = Border(top=THIN)
+
+    section(ws, 29, "Sources", 4)
+    line(30, "Existing cash and short-term investments", "=-C10")
+    line(31, "Term loan B", f"={a['tlb_x']}*C5", key="tlb_amount")
+    line(32, "Senior notes", f"={a['notes_x']}*C5", key="notes_amount")
+    line(33, "Revolver drawn at close", 0.0, color=BLUE, key="rcf_close")
+    line(34, "Sponsor equity (plug)", "=C27-SUM(C30:C33)", bold=True, key="sponsor_equity")
+    t = line(35, "Total sources", "=SUM(C30:C34)", bold=True)
+    t.border = Border(top=THIN)
+
+    section(ws, 37, "Checks and stats", 4)
+    line(38, "Sources minus uses (must be 0)", "=ROUND(C35-C27,6)", key="su_check")
+    line(39, "Total new debt / EBITDA", '=IF(C5<=0,"n/a",(C31+C32+C33)/C5)', "x")
+    line(40, "Sponsor equity % of total sources", '=IF(C35=0,"n/a",C34/C35)', "pct")
+    ws.column_dimensions["A"].width = 46
+    ws.column_dimensions["C"].width = 16
+    ws.column_dimensions["D"].width = 50
+    return ws
+
+
+# ---- Model: projections, taxes, free cash flow, debt schedule -------------------------
+def build_projection(wb, data: dict, m: Model):
+    """
+    Columns: B = last actual year (closing balance sheet), C..G = projection years
+    (same letters as the Assumptions tab, so the live driver for a year sits in the same column).
+    Interest is charged on BEGINNING-of-year balances to avoid a circular reference.
+    """
+    ws = wb.create_sheet("Model")
+    H, L, hr, a = "Historicals", m.last_hist_col, m.hist, m.a
+    A = "Assumptions"
+    years = m.proj_years
+    cols = [m.proj_cols[y] for y in years]
+    title(ws, "Projections, free cash flow and debt schedule ($ in millions)",
+          "Black = formula. Drivers come from the live rows on Assumptions (selected scenario). "
+          "Interest on beginning balances (no circularity). Depreciation excludes acquired-intangible amortization.")
+    header_row(ws, 4, ["", f"{data['years'][-1]}A"] + [f"{y}E" for y in years])
+    r = {}
+    row = [5]
+    writing = [False]   # pass 1 only assigns row numbers (formulas refer to rows further down); pass 2 writes
+
+    def sec(text):
+        row[0] += 1
+        if writing[0]:
+            section(ws, row[0], text, 2 + len(years))
+        row[0] += 1
+
+    def add(key, label, kind, first=None, proj=None, bold=False, color_first=GREEN, border=False, italic=False):
+        n = row[0]
+        r[key] = n
+        if not writing[0]:
+            row[0] += 1
+            return n
+        ws.cell(row=n, column=1, value=label).font = font(bold=bold, italic=italic)
+        if first is not None:
+            cell(ws, f"B{n}", first.format(r=r, n=n) if isinstance(first, str) and "{" in first else first, kind,
+                 color_first if isinstance(first, str) and "!" in first else (BLUE if not isinstance(first, str) else BLACK),
+                 bold=bold, italic=italic)
+        if proj is not None:
+            for i, c in enumerate(cols):
+                p = "B" if i == 0 else cols[i - 1]
+                f = proj.format(c=c, p=p, r=r, n=n)
+                x = cell(ws, f"{c}{n}", f, kind, GREEN if f.count("!") and not any(
+                    k in f for k in ("+", "*", "-", "/", "MIN", "MAX", "IF")) else BLACK, bold=bold, italic=italic)
+                if border:
+                    x.border = Border(top=THIN)
+        if border and first is not None:
+            ws[f"B{n}"].border = Border(top=THIN)
+        row[0] += 1
+        return n
+
+    live = lambda key: f"{A}!{{c}}{m.live[key]}"   # noqa: E731
+
+    for pass_no in (1, 2):
+        writing[0] = pass_no == 2
+        row[0] = 5
+        _projection_rows(sec, add, live, r, H, L, hr, a)
+
+    m.model_rows = r
+    m.model_cols = {"base": "B", **{y: c for y, c in zip(years, cols)}}
+    ws.column_dimensions["A"].width = 50
+    for c in ["B"] + cols:
+        ws.column_dimensions[c].width = 13
+    ws.freeze_panes = "B5"
+    return ws
+
+
+def _projection_rows(sec, add, live, r, H, L, hr, a):
+    sec("Income statement")
+    add("rev", "Revenue", "money", f"={H}!{L}{hr['revenue']}", "={p}{n}*(1+" + live("growth") + ")", bold=True)
+    add("growth", "  growth", "pct", None, "={c}{r[rev]}/{p}{r[rev]}-1", italic=True)
+    add("ebitda_co", "EBITDA, company basis", "money", f"={a['company_ebitda']}",
+        "={c}{r[rev]}*" + live("margin"))
+    add("dil_adj", "Diligence adjustments (if selected)", "money", f"={a['ltm_ebitda']}-{a['company_ebitda']}",
+        f'=IF({a["ebitda_basis"]}="Company adj. EBITDA",0,{{c}}{{r[rev]}}*{a["adj_pct_rev"]})')
+    add("ebitda", "EBITDA (selected basis)", "money", "=B{r[ebitda_co]}+B{r[dil_adj]}",
+        "={c}{r[ebitda_co]}+{c}{r[dil_adj]}", bold=True, border=True)
+    add("margin", "  margin", "pct", "=IF(B{r[rev]}=0,0,B{r[ebitda]}/B{r[rev]})", "={c}{r[ebitda]}/{c}{r[rev]}", italic=True)
+    add("dep", "Less: depreciation", "money", None, "=-{c}{r[rev]}*" + live("dep_pct"))
+    add("ebit", "EBIT", "money", None, "={c}{r[ebitda]}+{c}{r[dep]}", border=True)
+    add("int_tlb", "Less: interest, term loan B", "money", None, f"=-{{p}}{{r[tlb_end]}}*{a['tlb_rate']}")
+    add("int_notes", "Less: interest, senior notes", "money", None, f"=-{{p}}{{r[notes_end]}}*{a['notes_rate']}")
+    add("int_rcf", "Less: interest, revolver", "money", None, f"=-{{p}}{{r[rcf_end]}}*{a['rcf_rate']}")
+    add("ebt", "Pre-tax income", "money", None, "={c}{r[ebit]}+SUM({c}{r[int_tlb]}:{c}{r[int_rcf]})", border=True)
+    add("nol_use", "NOL used", "money", None, "=MIN({p}{r[nol_end]},MAX({c}{r[ebt]},0))")
+    add("taxable", "Taxable income", "money", None, "=MAX({c}{r[ebt]}-{c}{r[nol_use]},0)")
+    add("tax", "Less: cash taxes", "money", None, "=-{c}{r[taxable]}*" + live("tax_rate"))
+    add("ni", "Net income (cash tax basis)", "money", None, "={c}{r[ebt]}+{c}{r[tax]}", bold=True, border=True)
+    add("nol_end", "NOL balance, end of year", "money", f"=N({H}!{L}{hr['federal_nol']})",
+        "={p}{n}-{c}{r[nol_use]}", italic=True)
+
+    sec("Free cash flow")
+    add("fcf_ebitda", "EBITDA", "money", None, "={c}{r[ebitda]}")
+    add("fcf_tax", "Less: cash taxes", "money", None, "={c}{r[tax]}")
+    add("capex", "Less: capex", "money", None, "=-{c}{r[rev]}*" + live("capex_pct"))
+    add("nwc", "Net working capital (balance)", "money", f"={H}!{L}{hr['nwc']}", "={c}{r[rev]}*" + live("nwc_pct"),
+        italic=True)
+    add("d_nwc", "Less: increase in net working capital", "money", None, "=-({c}{r[nwc]}-{p}{r[nwc]})")
+    add("fcf_int", "Less: cash interest", "money", None, "=SUM({c}{r[int_tlb]}:{c}{r[int_rcf]})")
+    add("fcf", "Free cash flow before debt repayment", "money", None,
+        "={c}{r[fcf_ebitda]}+{c}{r[fcf_tax]}+{c}{r[capex]}+{c}{r[d_nwc]}+{c}{r[fcf_int]}", bold=True, border=True)
+    add("mand", "Less: mandatory term loan amortization", "money", None,
+        f"=-MIN({{p}}{{r[tlb_end]}},{a['tlb_amort']}*{a['tlb_amount']})")
+    add("fcf_after", "Cash flow after mandatory repayment", "money", None, "={c}{r[fcf]}+{c}{r[mand]}", border=True)
+
+    sec("Cash and revolver")
+    add("over_min", "Cash above minimum before revolver and sweep", "money", None,
+        f"={{p}}{{r[cash_end]}}+{{c}}{{r[fcf_after]}}-{a['min_cash']}")
+    add("rcf_repay", "Revolver repayment", "money", None, "=-IF({c}{r[over_min]}>0,MIN({p}{r[rcf_end]},{c}{r[over_min]}),0)")
+    add("rcf_draw", "Revolver draw (funds any shortfall)", "money", None,
+        f"=IF({{c}}{{r[over_min]}}<0,MIN(-{{c}}{{r[over_min]}},{a['rcf_size']}-{{p}}{{r[rcf_end]}}),0)")
+    add("excess", "Excess cash after revolver", "money", None, "={c}{r[over_min]}+{c}{r[rcf_repay]}+{c}{r[rcf_draw]}")
+    add("sweep", "Less: optional term loan repayment (cash sweep)", "money", None,
+        f'=-IF({a["sweep_on"]}="On",MIN({{p}}{{r[tlb_end]}}+{{c}}{{r[mand]}},MAX({{c}}{{r[excess]}},0)*{a["sweep_pct"]}),0)')
+    add("cash_end", "Cash, end of year", "money", f"={a['min_cash']}",
+        f"={a['min_cash']}+{{c}}{{r[excess]}}+{{c}}{{r[sweep]}}", bold=True, border=True)
+
+    sec("Debt schedule (end of year balances)")
+    add("tlb_end", "Term loan B", "money", f"={a['tlb_amount']}", "={p}{n}+{c}{r[mand]}+{c}{r[sweep]}")
+    add("notes_end", "Senior notes (bullet)", "money", f"={a['notes_amount']}", "={p}{n}")
+    add("rcf_end", "Revolver", "money", f"={a['rcf_close']}", "={p}{n}+{c}{r[rcf_repay]}+{c}{r[rcf_draw]}")
+    add("debt", "Total debt", "money", "=SUM(B{r[tlb_end]}:B{r[rcf_end]})", "=SUM({c}{r[tlb_end]}:{c}{r[rcf_end]})",
+        bold=True, border=True)
+    add("net_debt", "Net debt", "money", "=B{r[debt]}-B{r[cash_end]}", "={c}{r[debt]}-{c}{r[cash_end]}")
+
+    sec("Credit statistics")
+    add("lev", "Total debt / EBITDA", "x", '=IF(B{r[ebitda]}<=0,"n/a",B{r[debt]}/B{r[ebitda]})',
+        '=IF({c}{r[ebitda]}<=0,"n/a",{c}{r[debt]}/{c}{r[ebitda]})')
+    add("net_lev", "Net debt / EBITDA", "x", '=IF(B{r[ebitda]}<=0,"n/a",B{r[net_debt]}/B{r[ebitda]})',
+        '=IF({c}{r[ebitda]}<=0,"n/a",{c}{r[net_debt]}/{c}{r[ebitda]})')
+    add("cover", "EBITDA / cash interest", "x", None,
+        '=IF({c}{r[fcf_int]}=0,"n/a",{c}{r[ebitda]}/-{c}{r[fcf_int]})')
+    add("paydown", "Cumulative debt paydown % of opening debt", "pct", None,
+        '=IF($B{r[debt]}=0,"n/a",1-{c}{r[debt]}/$B{r[debt]})')
+
+
 def build(data: dict, out_path) -> Model:
     wb = Workbook()
     m = Model()
     build_guide(wb, data, m)
     build_historicals(wb, data, m)
     build_assumptions(wb, data, m)
+    build_bridge(wb, data, m)
+    build_sources_uses(wb, data, m)
+    build_projection(wb, data, m)
     wb.save(out_path)
     return m

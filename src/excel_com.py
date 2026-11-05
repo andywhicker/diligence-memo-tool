@@ -24,7 +24,12 @@ $xl.Visible = $false; $xl.DisplayAlerts = $false
 $out = @{ formulas = 0; errors = @(); values = @{} }
 try {
   $wb = $xl.Workbooks.Open($job.path)
-  foreach ($s in $job.sets) { $wb.Worksheets.Item($s.sheet).Range($s.cell).Value2 = $s.value }
+  foreach ($s in $job.sets) {
+    # Always pass text, as if typed into the cell: Excel's COM layer caches the first value's type
+    # and rejects a number after a string in the same run.
+    $t = if ($s.value -is [string]) { $s.value } else { ([double]$s.value).ToString([Globalization.CultureInfo]::InvariantCulture) }
+    $wb.Worksheets.Item($s.sheet).Range($s.cell).Formula = [string]$t
+  }
   if ($job.ops) { foreach ($op in $job.ops) { & ([scriptblock]::Create($op)) } }
   $xl.CalculateFull()
   foreach ($ws in $wb.Worksheets) {
