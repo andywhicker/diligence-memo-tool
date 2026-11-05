@@ -128,6 +128,9 @@ class Model:
     proj_cols: dict = field(default_factory=dict)   # projection year -> column letter on Assumptions
     proj_years: list = field(default_factory=list)
     placeholders: list = field(default_factory=list)
+    case: dict = None                               # management case or consensus, if any
+    scenarios: list = field(default_factory=list)
+    scen_rows: dict = field(default_factory=dict)
 
 
 def _source_text(item: dict) -> str:
@@ -228,8 +231,11 @@ def build_historicals(wb, data: dict, m: Model):
                 ws[f"{c}{row}"].alignment = Alignment(horizontal="right")
         row += 1
 
-    # market-based valuation at the latest date
+    # market-based valuation at the latest date (public companies only)
     L = m.last_hist_col
+    if not data.get("is_public", True):
+        _finish_historicals(ws, years, cols, src_col)
+        return ws
     row += 1
     section(ws, row, "Market valuation at latest share price", len(years) + 2)
     row += 1
@@ -246,17 +252,158 @@ def build_historicals(wb, data: dict, m: Model):
         m.hist[key] = row
         cell(ws, f"{L}{row}", f, kind)
         row += 1
+    _finish_historicals(ws, years, cols, src_col)
+    return ws
 
+
+def _finish_historicals(ws, years, cols, src_col):
     ws.column_dimensions["A"].width = 52
     for y in years:
         ws.column_dimensions[cols[y]].width = 13
     ws.column_dimensions[src_col].width = 46
     ws.freeze_panes = "B5"
+
+
+# ---- Cases (management case or consensus) --------------------------------------------
+SCENARIOS = ["Base", "Upside", "Downside"]
+# rows on the Cases tab that feed the 4th scenario on Assumptions (same column letters by year)
+CASE_ROWS = {"growth": 27, "margin": 28, "capex_pct": 29}
+
+
+def prepare_case(data: dict, m: Model):
+    """Pick the case source: management projections (CIM) first, else a consensus file."""
+    if data.get("projection_years"):
+        ins = data["inputs"]
+        vals = {}
+        for y in data["projection_years"]:
+            v = {}
+            for slot, key in (("proj_revenue", "revenue"), ("proj_adj_ebitda", "ebitda"), ("proj_capex", "capex")):
+                item = ins.get(slot, {}).get(y)
+                if item:
+                    v[key] = {"value": item["value"], "cite": _source_text(item), "comment": _quote_comment(item)}
+            vals[y] = v
+        m.case = {"name": "Management", "label": "Management case (from the CIM)", "values": vals,
+                  "source": f"Management projections in {data['source_document']}", "test_only": False}
+    elif data.get("consensus"):
+        c = data["consensus"]
+        vals = {}
+        for y, metrics in c["by_year"].items():
+            vals[y] = {k: {"value": d["value"],
+                           "cite": f"{d['source']}, as of {d['as_of']}" + (f", n={d['num_analysts']}" if d["num_analysts"] else ""),
+                           "comment": None} for k, d in metrics.items()}
+        m.case = {"name": "Consensus", "label": "Consensus estimates", "values": vals,
+                  "source": f"Consensus file {c['file']}", "test_only": c["test_only"]}
+    else:
+        m.case = None
+
+
+def build_cases(wb, data: dict, m: Model):
+    ws = wb.create_sheet("Cases")
+    case = m.case
+    years = m.proj_years
+    cols = [m.proj_cols[y] for y in years]
+    H, L, hr = "Historicals", m.last_hist_col, m.hist
+    title(ws, f"{case['label']} and sponsor haircut ($ in millions)",
+          "Blue = figure from the source (hover for the quote where available). The sponsor case applies your "
+          "haircuts; pick it in the scenario dropdown on Assumptions.")
+    section(ws, 4, "Case source", 7)
+    ws["A5"], ws["C5"] = "Case", case["name"]
+    ws["A6"], ws["C6"] = "Source", case["source"]
+    for ref in ("A5", "A6"):
+        ws[ref].font = font()
+    ws["C5"].font, ws["C6"].font = font(bold=True), font(GRAY, size=9)
+    if case["test_only"]:
+        ws["A7"] = "TEST ONLY: these are not real consensus estimates. Replace the file before relying on this case."
+        ws["A7"].font = font("C00000", bold=True)
+
+    section(ws, 9, "Haircut controls", 7)
+
+    def ctl(row, key, label, value, kind, note):
+        ws.cell(row=row, column=1, value=label).font = font()
+        cell(ws, f"C{row}", value, kind, BLUE, fill=YELLOW)
+        ws.cell(row=row, column=4, value=note).font = font(GRAY, italic=True, size=8)
+        m.a[key] = f"Cases!$C${row}"
+        m.placeholders.append(label)
+
+    ctl(10, "rev_haircut", "Revenue haircut", 0.0, "pct", "Placeholder: % cut to each year's revenue.")
+    ctl(11, "ebitda_haircut", "EBITDA haircut", 0.10, "pct", "Placeholder: % cut to each year's EBITDA.")
+    ctl(12, "haircut_phase", "Haircut phase-in (dropdown)", "Flat", None,
+        "Flat = same haircut every year. Ramp = 0 in year 1 rising to the full haircut in the last year.")
+    dv = DataValidation(type="list", formula1='"Flat,Ramp"', allow_blank=False)
+    ws.add_data_validation(dv)
+    dv.add(ws["C12"])
+
+    header_row(ws, 15, ["", f"{data['years'][-1]}A"] + [f"{y}E" for y in years])
+    ws["A16"] = "Haircut weight (share of the full haircut applied)"
+    ws["A16"].font = font(GRAY)
+    n = len(years)
+    for i, c in enumerate(cols, start=1):
+        cell(ws, f"{c}16", f'=IF($C$12="Flat",1,{i}/{n})', "pct", GRAY)
+
+    section(ws, 18, f"{case['name']} figures as provided", 2 + n)
+    ws["A19"], ws["A20"], ws["A21"], ws["A22"] = "Revenue", "EBITDA", "Capex", "Source"
+    for r in (19, 20, 21, 22):
+        ws[f"A{r}"].font = font()
+    ws["A22"].alignment = Alignment(vertical="top")
+    cell(ws, "B19", f"={H}!{L}{hr['revenue']}", "money", GREEN)
+    cell(ws, "B20", f"={H}!{L}{hr['adjusted_ebitda']}", "money", GREEN)
+    cell(ws, "B21", f"=N({H}!{L}{hr['capex']})", "money", GREEN)
+    extended = []
+    for i, (y, c) in enumerate(zip(years, cols)):
+        p = "B" if i == 0 else cols[i - 1]
+        v = case["values"].get(y, {})
+        for r, key in ((19, "revenue"), (20, "ebitda"), (21, "capex")):
+            item = v.get(key)
+            if item:
+                x = cell(ws, f"{c}{r}", round(item["value"], 6), "money", BLUE)
+                if item.get("comment"):
+                    x.comment = item["comment"]
+            elif key == "revenue":
+                pp = "B" if i <= 1 else cols[i - 2]
+                cell(ws, f"{c}{r}", f"={p}19*(1+IF({pp}19=0,0,{p}19/{pp}19-1))", "money", BLACK, fill=YELLOW)
+                extended.append(y)
+            elif key == "ebitda":
+                cell(ws, f"{c}{r}", f"={c}19*IF({p}19=0,0,{p}20/{p}19)", "money", BLACK, fill=YELLOW)
+            else:
+                cell(ws, f"{c}{r}", "n/a", None, GRAY)
+                ws[f"{c}{r}"].alignment = Alignment(horizontal="right")
+        cites = sorted({it["cite"] for it in v.values()})
+        s = ws[f"{c}22"]
+        s.value = "; ".join(cites) if cites else "Extended (not in source)"
+        s.font = font(GRAY, size=7)
+        s.alignment = Alignment(wrap_text=True, vertical="top")
+    if extended:
+        ws.cell(row=23, column=1, value=f"Yellow = not in the source; extended at the prior year's growth and margin "
+                                        f"({', '.join(sorted(set(extended)))}). Placeholder: your call.").font = \
+            font(GRAY, italic=True, size=8)
+
+    section(ws, 24, "Sponsor case after haircut (feeds the scenario dropdown)", 2 + n)
+    labels = {25: "Revenue", 26: "EBITDA", 27: "Revenue growth", 28: "EBITDA margin", 29: "Capex % revenue",
+              30: "EBITDA haircut ($)"}
+    for r, t in labels.items():
+        ws.cell(row=r, column=1, value=t).font = font(bold=r in (25, 26))
+    cell(ws, "B25", "=B19", "money")
+    cell(ws, "B26", "=B20", "money")
+    base_capex_row = m.scen_rows["capex_pct"][0]
+    for i, c in enumerate(cols):
+        p = "B" if i == 0 else cols[i - 1]
+        cell(ws, f"{c}25", f"={c}19*(1-$C$10*{c}16)", "money", bold=True)
+        cell(ws, f"{c}26", f"={c}20*(1-$C$11*{c}16)", "money", bold=True)
+        cell(ws, f"{c}27", f"=IF({p}25=0,0,{c}25/{p}25-1)", "pct")
+        cell(ws, f"{c}28", f"=IF({c}25=0,0,{c}26/{c}25)", "pct")
+        cell(ws, f"{c}29", f'=IF(ISNUMBER({c}21),IF({c}19=0,0,{c}21/{c}19),Assumptions!{c}{base_capex_row})', "pct")
+        cell(ws, f"{c}30", f"={c}26-{c}20", "money")
+    ws.cell(row=31, column=1, value="Capex % uses the source's capex where given, otherwise the Base case. "
+                                    "Depreciation, NWC and tax follow the Base case on Assumptions.").font = \
+        font(GRAY, italic=True, size=8)
+    ws.column_dimensions["A"].width = 50
+    for c in ["B"] + cols:
+        ws.column_dimensions[c].width = 15
+    ws.row_dimensions[22].height = 36
     return ws
 
 
 # ---- Assumptions ----------------------------------------------------------------
-SCENARIOS = ["Base", "Upside", "Downside"]
 
 
 def build_assumptions(wb, data: dict, m: Model, n_years: int = 5):
@@ -291,21 +438,28 @@ def build_assumptions(wb, data: dict, m: Model, n_years: int = 5):
     # scenario switch
     row = 4
     section(ws, row, "Scenario", 3 + n_years)
+    scens = SCENARIOS + ([m.case["name"]] if m.case else [])
+    m.scenarios = scens
     put(5, "scenario", "Active scenario (dropdown)", "Base", None,
-        "Switches every operating driver below between the Base, Upside and Downside rows.", placeholder=False)
+        "Switches every operating driver below between the scenario rows"
+        + (f", including the {m.case['name']} case from the Cases tab." if m.case else "."), placeholder=False)
     ws["C5"].font = font(BLUE, bold=True)
     ws["C5"].fill = PatternFill("solid", fgColor=YELLOW)
-    dropdown("C5", SCENARIOS)
+    dropdown("C5", scens)
     ws.cell(row=6, column=1, value="Scenario number (formula)").font = font(GRAY, size=9)
-    cell(ws, "C6", '=MATCH($C$5,{"Base","Upside","Downside"},0)', "count")
+    cell(ws, "C6", "=MATCH($C$5,{" + ",".join(f'"{s}"' for s in scens) + "},0)", "count")
     m.a["scenario_idx"] = "Assumptions!$C$6"
 
     # transaction
     row = 8
+    public = data.get("is_public", True)
     section(ws, row, "Transaction (closes at fiscal year end " + data["years"][-1] + ")", 3 + n_years)
-    put(9, "entry_method", "Entry valuation method (dropdown)", "Premium to share price", None,
+    put(9, "entry_method", "Entry valuation method (dropdown)",
+        "Premium to share price" if public else "EV / EBITDA multiple", None,
         "Public company, so a take-private: price per share = market price x (1 + premium). "
-        "Or switch to an EV / EBITDA multiple.")
+        "Or switch to an EV / EBITDA multiple." if public else
+        "Private company: no share price, so entry is set by the EV / EBITDA multiple. "
+        "(The premium method does not apply.)")
     dropdown("C9", ["Premium to share price", "EV / EBITDA multiple"])
     put(10, "premium", "Offer premium to share price", 0.30, "pct", "Placeholder: your call (take-private premiums are often 20-40%).")
     put(11, "entry_multiple", "Entry EV / EBITDA (if multiple method)", 22.0, "x",
@@ -400,7 +554,9 @@ def build_assumptions(wb, data: dict, m: Model, n_years: int = 5):
          [[0.21] * 5] * 3, "Placeholder: 21% federal statutory; NOLs are used separately in the model."),
     ]
     row += 2
+    m.scen_rows = {}
     for key, label, kind, values, basis in drivers:
+        rows = []
         for s, scen in enumerate(SCENARIOS):
             ws.cell(row=row, column=1, value=label if s == 0 else "").font = font(bold=s == 0)
             ws.cell(row=row, column=2, value=scen).font = font(GRAY, size=9)
@@ -410,15 +566,32 @@ def build_assumptions(wb, data: dict, m: Model, n_years: int = 5):
                 b = ws[f"{basis_col}{row}"]
                 b.value = basis
                 b.font = font(GRAY, italic=True, size=8)
+            rows.append(row)
+            row += 1
+        if m.case:
+            # 4th scenario: growth / margin / capex from the Cases tab; other drivers follow Base
+            ws.cell(row=row, column=2, value=m.case["name"]).font = font(GRAY, size=9)
+            for y in m.proj_years:
+                c = m.proj_cols[y]
+                if key in CASE_ROWS:
+                    cell(ws, f"{c}{row}", f"=Cases!{c}{CASE_ROWS[key]}", kind, GREEN)
+                else:
+                    cell(ws, f"{c}{row}", f"={c}{rows[0]}", kind, BLACK)
+            b = ws[f"{basis_col}{row}"]
+            b.value = (f"{m.case['name']} case, after haircut (Cases tab)." if key in CASE_ROWS
+                       else "Follows Base (type over to set a different value for this case).")
+            b.font = font(GRAY, italic=True, size=8)
+            rows.append(row)
             row += 1
         ws.cell(row=row, column=1, value=f"{label}: live").font = font(NAVY, bold=True)
         ws.cell(row=row, column=2, value="=$C$5").font = font(NAVY, size=9)
         for y in m.proj_years:
             c = m.proj_cols[y]
-            f = f"=CHOOSE($C$6,{c}{row - 3},{c}{row - 2},{c}{row - 1})"
+            f = "=CHOOSE($C$6," + ",".join(f"{c}{r}" for r in rows) + ")"
             x = cell(ws, f"{c}{row}", f, kind, BLACK, bold=True)
             x.border = Border(top=THIN, bottom=THIN)
         m.live[key] = row
+        m.scen_rows[key] = rows
         m.placeholders.append(label)
         row += 2
 
@@ -874,9 +1047,12 @@ def build(data: dict, out_path) -> Model:
     m = Model()
     # sensitivity shift cells live on the Returns tab; other tabs reference them by address
     m.a.update({k: f"Returns!$C${r}" for k, r in SHIFT_ROWS.items()})
+    prepare_case(data, m)
     build_guide(wb, data, m)
     build_historicals(wb, data, m)
     build_assumptions(wb, data, m)
+    if m.case:
+        build_cases(wb, data, m)
     build_bridge(wb, data, m)
     build_sources_uses(wb, data, m)
     build_projection(wb, data, m)

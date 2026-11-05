@@ -71,8 +71,19 @@ def _split(ref: str):
 
 
 def check(path, ops=None) -> dict:
-    """Recalculate in Excel, return {'formulas': n, 'errors': [...]}, and save calculated values."""
-    return _run({"path": str(Path(path).resolve()), "sets": [], "gets": [], "ops": ops or [], "save": True})
+    """
+    Recalculate in Excel, return {'formulas': n, 'errors': [...]}, and save calculated values.
+    Works on a temporary copy outside OneDrive, then copies the result back: Office can serve a
+    stale cached version of OneDrive files, and AutoSave can interfere.
+    """
+    import shutil
+    path = Path(path).resolve()
+    with tempfile.TemporaryDirectory() as tmp:
+        work = Path(tmp) / path.name
+        shutil.copy2(path, work)
+        result = _run({"path": str(work), "sets": [], "gets": [], "ops": ops or [], "save": True})
+        shutil.copy2(work, path)
+    return result
 
 
 def evaluate(path, sets: dict, gets: list) -> dict:
