@@ -215,8 +215,12 @@ def render(t: FinTable) -> tuple[str, list[str]]:
     """Return (markdown table, list of check lines for under the table)."""
     lines = ["| Metric ($ in millions) | " + " | ".join(t.years) + " |",
              "|---|" + "---|" * len(t.years)]
+    calc_rows = {"revenue_growth", "gross_margin", "capex_pct"}
     for row in ORDER:
-        lines.append(f"| {LABELS[row]} | " + " | ".join(_fmt(t.cells.get((row, y))) for y in t.years) + " |")
+        cells = [_fmt(t.cells.get((row, y))) for y in t.years]
+        if row in calc_rows:
+            cells = ["n/a" if c == "Not disclosed" else c for c in cells]   # calc impossible, not undisclosed
+        lines.append(f"| {LABELS[row]} | " + " | ".join(cells) + " |")
 
     sourced = [(k, c) for k, c in t.cells.items() if not c.calc]
     corr = [c for _, c in sourced if c.corroborated_on]

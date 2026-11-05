@@ -9,6 +9,7 @@ Usage:
 
 import argparse
 import json
+import re
 import sys
 import time
 from datetime import date
@@ -17,7 +18,7 @@ from pathlib import Path
 import config
 from src import llm
 from src.chunker import make_chunks
-from src import consistency, fintable
+from src import consistency, fintable, render
 from src.citations import enforce
 from src.synthesize import write_draft
 from src.extract import extract_chunk
@@ -141,8 +142,8 @@ def full_run(pdf: str, fresh: bool, reuse_draft: bool = False) -> None:
     table_md, table_checks = fintable.render(table)
     notes_md, notes_report = enforce("\n".join(f"- {n}" for n in table.notes), m.findings)
     report.deleted += [(l, f"[table note] {r}") for l, r in notes_report.deleted]
-    fin_block = "\n".join([table_md, "", *[f"- {c}" for c in table_checks],
-                           *([notes_md] if notes_md.strip() else [])])
+    fin_block = "\n".join([table_md, "", "**Table notes**", "", *[f"- {c}" for c in table_checks],
+                           *([notes_md] if notes_md.strip() else []), "", "**Commentary**"])
 
     print("Running consistency check...")
     consistency_md, dropped = consistency.run(m.findings, table.calcs,
@@ -171,7 +172,19 @@ def full_run(pdf: str, fresh: bool, reuse_draft: bool = False) -> None:
     (m.out_dir / "citation_log.md").write_text("\n".join(log_lines), encoding="utf-8")
 
     print(f"Citation check: kept {report.kept} lines, deleted {len(report.deleted)}")
-    print(f"Memo: {memo_path}")
+
+    # ---- Step 7: deliverables (Markdown + Word + PDF) at the top of output/ ----
+    title = next((l for l in memo.splitlines() if l.startswith("# ")), "# Memo")
+    company = title.split(":", 1)[-1].strip() if ":" in title else Path(pdf).stem
+    base = config.OUTPUT_DIR / f"{re.sub(r'[^A-Za-z0-9]+', '_', company).strip('_')}_Diligence_Memo_{date.today().isoformat()}"
+    base.with_suffix(".md").write_text(memo, encoding="utf-8")
+    docx_path = render.to_docx(memo, base.with_suffix(".docx"))
+    pdf_path = render.to_pdf(docx_path)
+    print("\nDeliverables:")
+    for p in (base.with_suffix(".md"), docx_path, pdf_path):
+        if p:
+            print(f"  {p}")
+    print(f"Working files (findings, logs, drafts): {m.out_dir}")
     print(f"\n{llm.tracker.summary()} | time: {time.time() - started:.0f}s")
 
 
