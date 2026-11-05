@@ -83,14 +83,24 @@ def _get_client() -> anthropic.Anthropic:
     return _client
 
 
-def ask(prompt: str, *, label: str, system: str | None = None, max_tokens: int = 32000) -> str:
-    """Send one prompt, return the model's text answer, and log usage."""
+def ask(prompt: str, *, label: str, system: str | None = None, max_tokens: int = 32000,
+        schema: dict | None = None) -> str:
+    """
+    Send one prompt, return the model's text answer, and log usage.
+
+    If `schema` (a JSON Schema) is given, the API guarantees the answer is
+    valid JSON matching that shape.
+    """
     client = _get_client()
+
+    output_config = {"effort": config.EFFORT}
+    if schema:
+        output_config["format"] = {"type": "json_schema", "schema": schema}
 
     params = dict(
         model=config.MODEL,
         max_tokens=max_tokens,
-        output_config={"effort": config.EFFORT},
+        output_config=output_config,
         messages=[{"role": "user", "content": prompt}],
     )
     if system:
