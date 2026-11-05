@@ -3,9 +3,9 @@
 | Field | Value |
 |---|---|
 | Company | Northfold (full legal name not disclosed) (p. 3) |
-| Ticker / Status | Private, owned by its founders (p. 3) |
-| Source document | Sale-process marketing document for a sale of 100% of the Company, with indications of interest due April 30, 2026 (p. 10) |
-| Fiscal period covered | Fiscal year ended December 31, 2025 (pp. 4, 5) |
+| Ticker / Status | Private; owned by its founders (p. 3) |
+| Source document | Sale materials (document type not stated); indications of interest due April 30, 2026 (p. 10) |
+| Fiscal period covered | Fiscal year ended December 31, 2025 (pp. 4, 8) |
 | Memo generated | 2026-11-05 |
 | Pages processed | 10 of 10 PDF pages |
 
@@ -16,79 +16,72 @@
 ## 1. Executive Summary
 
 - **Business in one sentence:** Northfold designs and manufactures compact electronic warfare (EW) and signals intelligence (SIGINT) sensors for the U.S. Army, U.S. Special Operations Command and allied customers (p. 3).
-- **Scale:** FY2025 revenue was $201.4 million (p. 7).
-  - FY2025 operating income was $30.9 million (p. 7).
-  - FY2025 Adjusted EBITDA was $39.8 million, a calculated 19.8% margin (calc.; p. 7).
-- **Key positives:**
-  1. Revenue grew a calculated 18.4% in FY2024 and 19.2% in FY2025, while operating margin expanded from 12.6% to 15.3% between FY2023 and FY2025 (calc.; p. 7).
-  2. Total backlog of $295.0 million covers 1.46x FY2025 revenue (calc.; pp. 5, 7).
-  3. Net leverage is a modest 0.92x FY2025 Adjusted EBITDA, and the $25.0 million revolver is undrawn (calc.; pp. 7, 8).
-- **Key concerns:**
-  1. The largest program, the Army's Tactical Spectrum Sensor, faces a recompete expected in FY2028, and management projections assume it is won (pp. 5, 9).
-  2. $2.5 million of FY2025 add-backs are pro forma cost savings from a facility consolidation that had not occurred as of December 31, 2025 (p. 7).
-  - _(uncited statement removed; see citation_log.md)_
-     - The narrative cites backlog of $310.0 million, but the backlog table shows $295.0 million (pp. 3, 5).
-     - The narrative cites a 20.1% Adjusted EBITDA margin, but the calculated margin is 19.8% (calc.; pp. 3, 7).
-- **Biggest open question:** What share of revenue and backlog does the Tactical Spectrum Sensor program represent, and what does the plan look like if the FY2028 recompete is lost (pp. 5, 9)?
+- **Scale:** FY2025 revenue was $201.4 million, operating income $30.9 million, and Adjusted EBITDA $39.8 million (p. 7).
+- **Key positives (3):**
+  - Revenue grew 18.4% in FY2024 and 19.2% in FY2025, while Adj. EBITDA margin rose from 16.9% to 19.8% over FY2023–FY2025 (calc.; p. 7).
+  - Net leverage is low at 0.92x Adj. EBITDA, and the $45.0 million term loan will be repaid at closing (calc.; pp. 7, 8).
+  - The company holds sole-source positions on two Army programs of record, and total backlog grew from $244.0 million to $295.0 million during FY2025 (pp. 3, 5).
+- **Key concerns (3):**
+  - The largest program, the Army's Tactical Spectrum Sensor, faces a recompete in fiscal 2028, and management's projections assume the company wins it (pp. 5, 9).
+  - FY2025 Adj. EBITDA includes $2.5 million of pro forma cost savings from a facility consolidation that had not happened as of December 31, 2025 (p. 7).
+  - Revenue is concentrated: the U.S. Army is 41% and the top five customers are 78% of FY2025 revenue (p. 5).
+- **Biggest open question:** What share of revenue and backlog comes from the Tactical Spectrum Sensor program, and what is the evidence behind management's assumption of winning the fiscal 2028 recompete (pp. 5, 9)?
 
 ## 2. Business Overview
 
-- **Segments:**
+- **Segments:** The company reports two segments (p. 4).
   - Tactical EW Sensors were 61% of FY2025 revenue (p. 4).
   - Strategic SIGINT Receivers were 39% of FY2025 revenue (p. 4).
-  - Segment-level margins: Not disclosed.
-- **Business model:**
-  - Contract mix in FY2025 was 65% firm-fixed-price, 28% cost-plus and 7% time-and-materials (p. 5).
-  - FY2025 growth was driven by higher production volumes on the Tactical Spectrum Sensor program (p. 7).
-  - Split of recurring/production revenue vs. development/project revenue: Not disclosed.
-- **Programs of record:** The Company holds sole-source positions on two Army programs of record (p. 3).
-- **Geographic footprint:**
-  - Headquartered in Huntsville, Alabama (p. 3).
-  - Manufactures in a single 120,000 square foot leased facility in Huntsville (p. 4).
-  - Revenue split by geography (U.S. vs. allied/international): Not disclosed.
-- **Headcount:** 410 employees, of whom 254 (62%) hold active security clearances (pp. 3, 4).
-- **Ownership / history:**
-  - Founded in 2009 and privately owned by its founders (p. 3).
-  - Shareholders are exploring a sale of 100% of the Company, and no asking price is stated (p. 10).
-  - M&A history: Not disclosed. Growth is presented without reference to acquisitions, but organic growth cannot be confirmed.
+  - Segment profitability and prior-year segment mix: Not disclosed. (p. 4)
+- **Business model:** The company designs and manufactures sensors, a product model, and sells under government contract vehicles (pp. 3, 5).
+  - FY2025 contract mix was 65% firm-fixed-price, 28% cost-plus and 7% time-and-materials (p. 5).
+  - Management attributes FY2025 growth to higher production volumes on the Tactical Spectrum Sensor program (p. 7).
+  - Recurring vs. project revenue split: Not disclosed. (pp. 3, 5)
+- **Geographic footprint:** Headquarters and manufacturing are in a 120,000 square foot leased facility in Huntsville, Alabama (pp. 3, 4).
+- **End markets:** Customers are the U.S. Army, U.S. Special Operations Command and allied customers (p. 3).
+  - International / allied share of revenue: Not disclosed. (p. 3)
+- **Headcount:** The company employs 410 people (p. 4).
+  - 254 employees, or 62%, hold active security clearances (pp. 3, 4).
+  - Revenue per employee was $0.49 million in FY2025 (calc.; pp. 4, 7).
+- **Ownership / history:** Founded in 2009 and privately owned by its founders (p. 3).
+  - The shareholders are exploring a sale of 100% of the company, with no asking price stated (p. 10).
+  - The findings disclose no acquisitions, so reported growth appears organic. Organic growth is not separately disclosed. (p. 3)
 
 ## 3. Market & Competitive Position
 
-- **Market size (management estimate):**
-  - The addressable market for tactical EW and SIGINT sensors is $4.2 billion in 2025 (p. 6).
-  - The market is estimated to grow 7% per year (p. 6).
-  - Northfold's historical and projected growth both exceed this stated market growth rate, which implies share gains that need support (calc.; pp. 6, 7, 9).
-- **Named competitors:** None are named. The document cites larger defense primes and several venture-backed entrants (p. 6).
-  - Large primes are both competitors and a likely source of Northfold's subcontract revenue, which is 42% of revenue (pp. 5, 6).
-- **Competitive advantages (management's view):**
-  - Positions on two Army programs of record, described as mission-critical and sole-source (p. 3).
-  - A largely cleared workforce (p. 3).
-- **Regulatory or policy exposure:** Not disclosed. The findings do not address export controls/ITAR, CMMC or budget sensitivity, although allied customers are served and are part of the plan (pp. 3, 9).
+- **Market size (management's estimate):** The addressable market for tactical EW and SIGINT sensors was $4.2 billion in 2025 (p. 6).
+  - Management expects that market to grow 7% per year (p. 6).
+  - The company's revenue growth in FY2024–FY2025 exceeded the estimated market growth rate (calc.; pp. 6, 7).
+- **Competitors:** Principal competitors are described as larger defense primes and several venture-backed entrants (p. 6).
+  - Specific named competitors: Not disclosed. (p. 6)
+- **Stated competitive advantages (management's view):** Management describes its two Army programs of record as mission-critical and sole-source (p. 3).
+  - Management cites a cleared workforce, with 62% of employees holding active clearances (p. 3).
+- **Regulatory or policy exposure** (e.g. budget, export controls / ITAR on allied sales, CMMC): Not disclosed.
 
 ## 4. Customers, Contracts & Backlog
 
-- **Customer concentration (FY2025):**
-  - The U.S. Army was 41% of revenue (p. 5).
-  - The top five customers were 78% of revenue (p. 5).
+- **Customer concentration:**
+  - Largest customer: the U.S. Army was 41% of FY2025 revenue (p. 5).
+  - Top five customers were 78% of FY2025 revenue (p. 5).
   - Top-10 concentration and prior-year concentration: Not disclosed.
 - **Government exposure:**
   - Northfold is prime contractor on 58% of revenue and subcontractor on 42% (p. 5).
-  - Total U.S. government share, DoD vs. civil split, and allied/foreign military share: Not disclosed.
-- **Contract type mix (FY2025):** 65% firm-fixed-price, 28% cost-plus and 7% T&M (p. 5).
-  - The FFP-heavy mix exposes margins to cost overruns. (p. 5)
-- **Backlog at December 31, 2025:**
-  - Funded backlog was $176.0 million, unfunded $119.0 million and total $295.0 million (p. 5).
-  - Prior-year (December 31, 2024) comparison: funded $148.0 million, unfunded $96.0 million, total $244.0 million (p. 5).
-- **Backlog coverage:**
-  - Funded backlog covered 0.87x FY2025 revenue vs. 0.88x in FY2024, roughly flat (calc.; pp. 5, 7).
-  - Total backlog covered 1.46x FY2025 revenue vs. 1.44x in FY2024 (calc.; pp. 5, 7).
-- **Backlog discrepancy:** The narrative cites backlog of $310.0 million at December 31, 2025, above the $295.0 million in the backlog table (pp. 3, 5).
-- **Book-to-bill:** Not disclosed.
+  - Total U.S. government share of revenue and DoD vs. civil split: Not disclosed.
+- **Contract type mix (FY2025):** 65% firm-fixed-price, 28% cost-plus and 7% time-and-materials (p. 5).
+  - Most revenue is fixed-price, which exposes margins to cost overruns (p. 5).
+- **Backlog:**
+  - Funded backlog rose from $148.0 million at December 31, 2024 to $176.0 million at December 31, 2025 (p. 5).
+  - Unfunded backlog rose from $96.0 million to $119.0 million over the same period (p. 5).
+  - Total backlog rose from $244.0 million to $295.0 million (p. 5).
+  - Funded backlog covers 0.87x FY2025 revenue, and total backlog covers 1.46x (calc.; pp. 5, 7).
+  - Funded coverage was 0.88x a year earlier, so funded backlog has not grown faster than revenue (calc.; pp. 5, 7).
+  - The narrative cites backlog of $310.0 million at December 31, 2025, which differs from the $295.0 million total backlog figure (pp. 3, 5).
+  - Book-to-bill: Not disclosed.
 - **Key contracts / recompetes:**
-  - The Tactical Spectrum Sensor is the largest program and faces a recompete expected in FY2028 (p. 5).
-  - Its revenue and backlog share: Not disclosed.
-  - Management projections assume the recompete is won (p. 9).
-- **Protests and contract expirations other than the Tactical Spectrum Sensor:** Not disclosed.
+  - The largest program, the Army's Tactical Spectrum Sensor, faces a recompete expected in fiscal 2028 (p. 5).
+  - Management's projections assume the recompete is won (p. 9).
+  - The program's share of revenue and backlog: Not disclosed.
+  - Other material contract expirations and any bid protests: Not disclosed.
 
 ## 5. Financial Summary
 
@@ -160,86 +153,61 @@
 
 **Commentary**
 
-- **Growth:** Revenue grew from $142.6 million in FY2023 to $201.4 million in FY2025, with calculated growth of 18.4% in FY2024 and 19.2% in FY2025 (calc.; p. 7).
-  - Organic growth cannot be separately confirmed because acquisition history is not disclosed. (calc.; p. 7)
-- **Margins:**
-  - Gross margin expanded each year, from 31.0% in FY2023 to 32.0% in FY2025 (calc.; p. 7).
-  - SG&A grew more slowly than revenue, driving operating margin from 12.6% to 15.3% (calc.; p. 7).
-- **Cash conversion:** FCF / Adjusted EBITDA was steady but below half in every year: 44.4% in FY2023, 46.3% in FY2024 and 45.7% in FY2025 (calc.; pp. 7, 8).
-  - FY2025 free cash flow was $18.2 million against Adjusted EBITDA of $39.8 million (calc.; pp. 7, 8).
-- **Capex:** Capex was 3.0% of revenue in FY2025 (calc.; pp. 7, 8).
-  - Capex of $6.1 million exceeded D&A of $4.7 million (pp. 7, 8).
-  - Projected capex roughly doubles to $12.3 million by FY2030 (p. 9).
-- **Deleveraging:** The term loan declined from $52.0 million to $45.0 million during FY2025 (p. 8).
-  - Net leverage fell from 1.46x to 0.92x (calc.; pp. 7, 8).
+- Revenue rose each year from $142.6 million in FY2023 to $168.9 million in FY2024 and $201.4 million in FY2025 (p. 7).
+- Gross profit grew faster than revenue, and management reports a FY2025 gross margin of 32.0% (p. 7).
+- SG&A grew more slowly than revenue (from $29.4 million in FY2024 to $33.6 million in FY2025), which drove operating leverage (p. 7).
+- Management add-backs rose each year, from $2.6 million to $3.6 million to $4.2 million, so Adjusted EBITDA grew faster than operating income plus D&A (p. 7).
+- Capital expenditures were modest, at $4.2 million, $5.0 million and $6.1 million in FY2023–FY2025, but management projects capex rising to $12.3 million by FY2030 (pp. 8, 9).
 
 ## 6. Quality of Earnings Flags
 
-- _(uncited statement removed; see citation_log.md)_
-  - Management add-backs were $2.6 million in FY2023, $3.6 million in FY2024 and $4.2 million in FY2025, rising each year (p. 7).
-  - These amounts reconcile to the calculated gap between GAAP EBITDA and Adjusted EBITDA (calc.; p. 7).
-- **FY2025 add-back components:**
-  - **Pro forma cost savings: $2.5 million** from a planned facility consolidation that had not occurred as of December 31, 2025 (p. 7). This is the largest and least supportable add-back, because the savings are unrealized. Calculated GAAP EBITDA was $35.6 million (calc.; p. 7).
-  - **Founder compensation normalization: $1.1 million** (p. 7). This needs confirmation of the post-close roles and market-rate pay of the founders.
-  - **One-time legal expense: $0.6 million** (p. 7). The nature of the matter and the risk of recurrence are not disclosed.
-- **Facility consolidation conflict:** The consolidation behind the savings add-back would affect the single 120,000 square foot leased manufacturing facility (pp. 4, 7).
-  - One-time costs, lease exit costs and timing of the consolidation: Not disclosed. (pp. 4, 7)
-- **Margin tie-out:** The narrative states an Adjusted EBITDA margin of 20.1%, but the reported figures yield a calculated 19.8% (calc.; pp. 3, 7).
-- **Revenue recognition:** Not disclosed. Over-time vs. point-in-time policy, EAC methodology and cumulative catch-up adjustments are not covered, which matters given the 65% FFP mix (p. 5).
-- **Working capital (December 31, 2024 to December 31, 2025):**
+- **Adjusted EBITDA definition:** The company's formal definition is Not disclosed.
+  - The numbers reconcile as operating income plus D&A plus management add-backs: GAAP EBITDA of $35.6 million plus $4.2 million of add-backs equals $39.8 million in FY2025 (calc.; p. 7).
+- **FY2025 add-backs ($4.2 million total)** (p. 7):
+  - **Pro forma cost savings of $2.5 million**, the largest component, are from a planned facility consolidation that had not occurred as of December 31, 2025 (p. 7).
+    - This is an unrealized, forward-looking adjustment. (p. 7)
+    - The findings disclose only a single leased facility in Huntsville, so the scope of the consolidation is unclear (p. 4).
+  - **Founder compensation normalization of $1.1 million** (p. 7).
+    - A buyer will need to confirm the cost of replacement management after a 100% sale by the founders (p. 10).
+  - **One-time legal expense of $0.6 million** (p. 7).
+    - The nature of the matter and whether it could recur: Not disclosed. (p. 7)
+- **Prior-year add-backs:** Components of the $2.6 million (FY2023) and $3.6 million (FY2024) add-backs are Not disclosed (p. 7).
+- **Reported vs. calculated margin:** Management states Adj. EBITDA margin of 20.1% in fiscal 2025, but reported Adj. EBITDA divided by revenue gives 19.8% (calc.; pp. 3, 7).
+- **Cash conversion:** FCF / Adj. EBITDA was 44.4%, 46.3% and 45.7% in FY2023–FY2025, so less than half of Adjusted EBITDA converts to free cash flow (calc.; pp. 7, 8).
+  - FY2025 free cash flow was $18.2 million on operating cash flow of $24.3 million (calc.; p. 8).
+- **Tax structure:** The company is taxed as an S corporation, and cash taxes reflect state taxes only ($1.2 million in FY2025) (p. 8).
+  - Historical after-tax cash flow may not represent the business under a different ownership structure (p. 8).
+- **One-time / non-recurring items:** No items beyond the add-backs above are disclosed. Impairments: Not disclosed.
+- **Revenue recognition** (over-time vs. point-in-time, EAC methodology, cumulative catch-ups): Not disclosed.
+  - This matters given 65% firm-fixed-price revenue and $12.5 million of unbilled receivables (pp. 5, 8).
+- **Working capital:**
   - Accounts receivable rose from $26.0 million to $31.2 million (p. 8).
   - Unbilled receivables rose from $10.1 million to $12.5 million (p. 8).
+  - DSO including unbilled was broadly stable at 78 days in FY2024 and 79 days in FY2025 (calc.; pp. 7, 8).
   - Inventories rose from $8.7 million to $9.8 million (p. 8).
-  - DSO including unbilled was stable at a calculated 78 days in FY2024 and 79 days in FY2025 (calc.; pp. 7, 8).
-- **Taxes:** The Company is an S corporation, and cash taxes reflect state taxes only ($1.2 million in FY2025) (p. 8).
-  - Historical cash flow therefore excludes entity-level federal tax. (p. 8)
-- **Auditor and audit opinion:** Not disclosed.
-- **Material weaknesses:** Not disclosed.
+  - Customer advances rose from $2.4 million to $3.1 million (p. 8).
+- **Auditor and material weaknesses:** Not disclosed.
 
-## 7. LBO Inputs
+## 7. Key Risks
 
-| Input | Value | Cite |
-|---|---|---|
-| Base-year revenue | $201.4 million (FY2025) | (p. 7) |
-| Base-year EBITDA (reported / adjusted) | GAAP EBITDA (calc.) $35.6 million / Adjusted EBITDA $39.8 million (FY2025) | (calc.; p. 7) |
-| Adjusted EBITDA add-backs | $4.2 million total, including $2.5 million of unrealized pro forma cost savings | (p. 7) |
-| D&A | $4.7 million (FY2025) | (p. 7) |
-| Capex (maintenance vs. growth, if split) | $6.1 million (FY2025); maintenance/growth split not disclosed | (p. 8) |
-| Net working capital (or change in NWC) | Dec 31, 2025: AR $31.2 million, unbilled $12.5 million, inventory $9.8 million, AP $11.3 million, accrued liabilities $7.6 million, customer advances $3.1 million; change in NWC not disclosed | (p. 8) |
-| Cash tax rate / effective tax rate | Not disclosed; S corporation, with FY2025 cash taxes of $1.2 million (state only) | (p. 8) |
-| Existing debt (by tranche) | Term loan $45.0 million, to be repaid at closing; $25.0 million revolver, undrawn | (p. 8) |
-| Cash | $8.4 million (Dec 31, 2025) | (p. 8) |
-| Management projections – revenue | FY2026E $238.0 million; FY2027E $279.5 million; FY2028E $322.0 million; FY2029E $366.0 million; FY2030E $409.0 million | (p. 9) |
-| Management projections – Adjusted EBITDA | FY2026E $50.0 million; FY2027E $61.5 million; FY2028E $73.2 million; FY2029E $85.1 million; FY2030E $96.3 million (23.5% margin) | (p. 9) |
-| Management projections – capex | FY2026E $7.1 million; FY2027E $8.4 million; FY2028E $9.6 million; FY2029E $11.0 million; FY2030E $12.3 million | (p. 9) |
-| Key projection assumptions | Tactical Spectrum Sensor recompete won in FY2028; continued production ramp; two new allied customers from FY2027 | (p. 9) |
+1. **Tactical Spectrum Sensor recompete:** The largest program faces a recompete expected in fiscal 2028 (p. 5).
+   - Projections assume a win, so a loss would undermine both the growth case and the FY2030 targets of $409.0 million revenue and $96.3 million Adj. EBITDA (p. 9).
+2. **Customer and program concentration:** The U.S. Army is 41% and the top five customers are 78% of FY2025 revenue (p. 5).
+   - FY2025 growth was driven by Tactical Spectrum Sensor production volumes, which concentrates exposure on a single program (p. 7).
+3. **Adjusted EBITDA quality:** $2.5 million of FY2025 Adj. EBITDA is pro forma savings from a facility consolidation not yet executed (p. 7).
+   - Any valuation multiple applied to $39.8 million would include benefits that have not been achieved (p. 7).
+4. **Projection achievability:** Projections assume a continued production ramp, two new allied customers beginning in fiscal 2027, and margin expansion to 23.5% by fiscal 2030 (p. 9).
+   - This compares with an FY2025 Adj. EBITDA margin of 19.8% (calc.; p. 7).
+   - The FY2026 projection of $238.0 million revenue and $50.0 million Adj. EBITDA is the first near-term test (p. 9).
+5. **Cash conversion:** FCF has been below half of Adjusted EBITDA in each of the last three years, and management projects capex rising to $12.3 million by FY2030 (calc.; pp. 7, 8, 9).
+6. **Fixed-price execution:** Firm-fixed-price contracts are 65% of revenue, so cost overruns on production programs would fall directly on margins (p. 5).
+7. **Founder transition:** The founders own the company and are exploring a 100% sale (pp. 3, 10).
+   - The $1.1 million founder compensation normalization add-back assumes post-close management costs that have not been validated (p. 7).
+8. **Single-site operations:** All manufacturing takes place in one leased facility in Huntsville, Alabama (p. 4).
+   - A disruption there would affect the entire business. (p. 4)
+   - Lease terms are not disclosed. (p. 4)
 
-## 8. Key Risks
-
-1. **Recompete of the largest program (FY2028).**
-   - Losing the Tactical Spectrum Sensor recompete would hit the program that drove FY2025 growth (pp. 5, 7).
-   - The plan assumes the win, so it falls inside a typical hold period (p. 9).
-2. **Customer concentration.**
-   - The U.S. Army is 41% of revenue and the top five customers are 78% (p. 5).
-3. **Adjusted EBITDA quality.**
-   - $2.5 million of FY2025 Adjusted EBITDA rests on cost savings from a facility consolidation that has not happened (p. 7).
-   - The headline margin is overstated relative to reported figures (calc.; pp. 3, 7).
-4. **Projection risk.**
-   - The plan more than doubles Adjusted EBITDA to $96.3 million by FY2030 (p. 9).
-   - It relies on new allied customers and margin expansion to 23.5% (p. 9).
-   - The plan sits against a stated 7% market growth rate (p. 6).
-5. **Fixed-price execution.**
-   - 65% of revenue is firm-fixed-price, so cost overruns on production programs fall directly to margin (p. 5).
-6. **Dependence on primes who are also competitors.**
-   - Northfold is subcontractor on 42% of revenue (p. 5).
-   - Its principal competitors include larger defense primes (p. 6).
-7. **Single-site and key-person exposure.**
-   - All manufacturing is in one leased Huntsville facility (p. 4).
-   - The business is founder-owned, with founder compensation normalized in Adjusted EBITDA (pp. 3, 7).
-8. **Cleared workforce.**
-   - 62% of employees hold active clearances (p. 3).
-
-## 9. Consistency Check
+## 8. Consistency Check
 
 | Narrative claim | Cite | What the numbers show | Cite | Flag |
 |---|---|---|---|---|
@@ -256,44 +224,46 @@
 | Firm-fixed-price, cost-plus and time-and-materials contracts represented 65%, 28% and 7% of fiscal 2025 revenue. | (p. 5) | The customer section shows the same contract mix of 65% firm-fixed-price, 28% cost-plus and 7% time-and-materials. | (p. 5) | **Consistent**: The contract mix agrees between the narrative and the customer data. Note that the high firm-fixed-price share puts cost-overrun risk on Northfold, which matters for the margin-expansion assumptions. |
 | The $25.0 million revolving credit facility was undrawn at December 31, 2025. | (p. 8) | The balance sheet confirms a $25.0 million undrawn revolver. Total liquidity including cash is $33.4 million. Net leverage is 0.92x, and the $45.0 million term loan is repaid at closing. | (calc.; pp. 7, 8) | **Consistent**: The liquidity and debt statements agree with the balance sheet, and leverage is modest. |
 
-## 10. Questions for Management
+## 9. Questions for Management
 
 **Financial**
-1. Provide a full Adjusted EBITDA reconciliation and definition for FY2023–FY2025, including the components of the $2.6 million and $3.6 million add-backs in the earlier years (p. 7).
-2. For the $2.5 million of pro forma facility consolidation savings, address the following (p. 7):
-   - What is the timeline for the consolidation? (p. 7)
-   - What are the one-time costs and lease implications? (p. 7)
-   - What evidence supports the savings? (p. 7)
-3. Reconcile the stated 20.1% FY2025 Adjusted EBITDA margin to the reported $39.8 million Adjusted EBITDA on $201.4 million of revenue (pp. 3, 7).
-4. What is the nature of the $0.6 million legal expense, and is any related matter ongoing (p. 7)?
-5. What roles will the founders hold post-close, and what is the basis for the $1.1 million compensation normalization (p. 7)?
-6. Why does FCF conversion stay below half of Adjusted EBITDA each year, and what drives the gap between OCF and EBITDA (calc.; pp. 7, 8)?
-7. What is the change in net working capital by year, and what explains the growth in unbilled receivables (p. 8)?
-8. Split historical and projected capex into maintenance and growth, and explain the step-up to $12.3 million by FY2030 (p. 9).
-9. What would the tax position be under a buyer structure, given current S corporation status (p. 8)?
-10. Who is the auditor? Are the financials audited, and have any material weaknesses or control deficiencies been identified?
-11. What are the revenue recognition policies (over-time vs. point-in-time) and the EAC process? What cumulative catch-up adjustments were recorded in FY2023–FY2025?
-12. Has the Company made any acquisitions historically? Confirm that reported growth is fully organic.
+
+1. Provide the formal Adjusted EBITDA definition and a full add-back bridge for FY2023 and FY2024, which total $2.6 million and $3.6 million but are not itemized (p. 7).
+2. Describe the planned facility consolidation behind the $2.5 million of pro forma savings: which facilities are involved, the timing, one-time costs, and the status as of today (pp. 4, 7).
+3. Reconcile the stated 20.1% FY2025 Adj. EBITDA margin with $39.8 million of Adj. EBITDA on $201.4 million of revenue (pp. 3, 7).
+4. What was the nature of the $0.6 million one-time legal expense, and is the underlying matter resolved (p. 7)?
+5. How was the $1.1 million founder compensation normalization derived, and what is the expected cost of post-close management (p. 7)?
+6. Who audits the financial statements, are FY2023–FY2025 audited, and have any material weaknesses or significant deficiencies been identified? (Auditor and controls not disclosed.)
+7. Describe the revenue recognition policy: over-time vs. point-in-time, the EAC review process, and the size of cumulative catch-up adjustments in each year. (Not disclosed.)
+8. What drives FCF conversion below half of Adjusted EBITDA, and what is the outlook for unbilled receivables, which rose to $12.5 million (calc.; pp. 7, 8)?
+9. What would cash taxes have been under C-corporation status, given cash taxes currently reflect state taxes only (p. 8)?
+10. Provide segment-level revenue history and profitability for Tactical EW Sensors and Strategic SIGINT Receivers. (Segment margins not disclosed.)
+11. Bridge FY2025 actuals to FY2026 projections of $238.0 million revenue and $50.0 million Adj. EBITDA by program and customer (p. 9).
 
 **Customers & Contracts**
-13. What share of revenue and backlog does the Tactical Spectrum Sensor represent? Provide the recompete timeline, expected competitors and a downside plan if the recompete is lost (pp. 5, 9).
-14. Reconcile the $310.0 million backlog in the narrative with the $295.0 million in the backlog table (pp. 3, 5).
-15. What were book-to-bill and new awards by year? What is the expected conversion of unfunded backlog (p. 5)?
-16. Provide top-10 customer concentration for FY2023–FY2025 and identify the top five customers (p. 5).
-17. Provide the revenue split across U.S. Army, SOCOM, other U.S. government and allied customers, and the DoD vs. civil split (p. 3).
-18. On which programs is Northfold a subcontractor? Do any primes on those programs also compete with Northfold (pp. 5, 6)?
-19. Which customers are the two new allied customers assumed from FY2027, and what is their pipeline status (p. 9)?
-20. Which other material contracts have expirations or protests in the projection period?
+
+12. What share of FY2025 revenue and of December 31, 2025 backlog relates to the Tactical Spectrum Sensor program (p. 5)?
+13. What is the recompete strategy and expected competitive field for the fiscal 2028 Tactical Spectrum Sensor recompete, and what do projections look like if it is lost (pp. 5, 9)?
+14. Reconcile the $310.0 million backlog cited in the narrative with the $295.0 million total backlog at December 31, 2025 (pp. 3, 5).
+15. Provide book-to-bill by year and the expected conversion timing of the $119.0 million of unfunded backlog (p. 5). (Book-to-bill not disclosed.)
+16. Provide top-10 customer concentration and customer concentration for FY2023 and FY2024. (Not disclosed.)
+17. What is total U.S. government revenue, split between DoD, other agencies, and allied / foreign customers? (Not disclosed.)
+18. Who are the two new allied customers assumed to begin in fiscal 2027, and what is the status of those pursuits (p. 9)?
+19. List material contracts with periods of performance, expirations, option exercises, and any pending or past bid protests. (Not disclosed.)
+20. Who are the prime contractors on the 42% of revenue where Northfold is a subcontractor, and how concentrated is that exposure (p. 5)?
 
 **Operations**
-21. What is the FFP program margin history, including any loss-making contracts or reach-forward losses (p. 5)?
-22. What are the facility lease terms and capacity utilization? Can the single Huntsville site support the projected revenue (pp. 4, 9)?
-23. Provide segment-level revenue and margin history for Tactical EW Sensors and Strategic SIGINT Receivers (p. 4).
-24. What are cleared-employee attrition and retention arrangements, and which key personnel are critical to programs (p. 3)?
+
+21. What cost actions and mix shifts drive projected Adj. EBITDA margin expansion to 23.5% by fiscal 2030 (p. 9)?
+22. Break down projected capex, which rises from $7.1 million in FY2026 to $12.3 million in FY2030, between capacity expansion and maintenance (p. 9).
+23. What are the lease terms, including remaining term and renewal options, for the 120,000 square foot Huntsville facility (p. 4)?
+24. Which key personnel, including the founders, are expected to stay post-close, and what retention arrangements exist (pp. 3, 10)?
 
 **Other**
-25. What is the regulatory exposure? Specifically, address ITAR/export control compliance for allied sales, CMMC readiness and sensitivity to the defense budget.
-26. Provide the basis for the $4.2 billion addressable market estimate and the 7% growth rate (p. 6).
+
+25. Name the specific primes and venture-backed entrants Northfold competes against on its key programs (p. 6).
+26. What regulatory exposures apply (ITAR / export controls on allied sales, CMMC status, facility clearance levels)? (Not disclosed.)
+27. What is the basis for management's $4.2 billion addressable market estimate and its 7% annual growth rate (p. 6)?
 
 ## Appendix: Coverage Notes
 
@@ -302,4 +272,4 @@
 - MD&A no MD&A heading found; narrative pass covers the whole document.
 - 10 of 10 PDF pages had extractable text and were analyzed.
 - 133 findings verified against the source; 1 rejected (quote or number not found on the cited page). See rejected.json.
-- 9 memo lines deleted by the citation check (no valid citation or unsupported number). See citation_log.md.
+- 5 memo lines deleted by the citation check (no valid citation or unsupported number). See citation_log.md.

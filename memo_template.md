@@ -7,7 +7,7 @@ RULES FOR THE MODEL (apply to every section):
 3. Never estimate, derive, or round a number unless the derivation is shown and each input is cited.
    Derived figures are labeled "calc." with inputs cited, e.g. Gross margin 32.1% (calc.: p. 61).
 4. If the document does not state an item this template requires, write "Not disclosed" and add
-   a matching question under Section 10.
+   a matching question under Section 9.
 5. Keep section order and headers exactly as below. Do not add or remove sections.
 6. Text in [brackets] is guidance for the model and is replaced in the output.
 -->
@@ -33,7 +33,7 @@ RULES FOR THE MODEL (apply to every section):
 - **Scale:** [LTM/FY revenue and EBITDA or operating income, with cites]
 - **Key positives (3):** [Each one sentence, cited]
 - **Key concerns (3):** [Each one sentence, cited]
-- **Biggest open question:** [Single most important item from Section 10]
+- **Biggest open question:** [Single most important item from Section 9]
 
 ## 2. Business Overview
 
@@ -92,27 +92,11 @@ RULES FOR THE MODEL (apply to every section):
 - Working capital trends [receivables / contract assets, if notable]
 - Auditor and any material weaknesses
 
-## 7. LBO Inputs
-
-[Raw inputs only, each cited. No valuation, no returns. These feed a separate model.]
-
-| Input | Value | Cite |
-|---|---|---|
-| Base-year revenue | | |
-| Base-year EBITDA (reported / adjusted) | | |
-| D&A | | |
-| Capex (maintenance vs. growth, if split) | | |
-| Net working capital (or change in NWC) | | |
-| Cash tax rate / effective tax rate | | |
-| Existing debt (by tranche) | | |
-| Cash | | |
-| Management projections | [CIM only; otherwise "Not disclosed"] | |
-
-## 8. Key Risks
+## 7. Key Risks
 
 [5–8 risks, ranked by importance. Each: risk → why it matters → cite. Prioritize company-specific risks over boilerplate risk factors.]
 
-## 9. Consistency Check
+## 8. Consistency Check
 
 [Places where the narrative and the numbers disagree. Each item: narrative claim (cite) vs. number (cite) → nature of the discrepancy. If none found, write "No inconsistencies identified" and list the checks performed.]
 
@@ -120,9 +104,9 @@ RULES FOR THE MODEL (apply to every section):
 |---|---|---|---|---|
 | | | | | |
 
-## 10. Questions for Management
+## 9. Questions for Management
 
-[Numbered. Include one question for every "Not disclosed" item above, plus diligence questions raised by Sections 6, 8, and 9. Group by topic: Financial, Customers & Contracts, Operations, Other.]
+[Numbered. Include one question for every "Not disclosed" item above, plus diligence questions raised by Sections 6, 7, and 8. Group by topic: Financial, Customers & Contracts, Operations, Other.]
 
 ## Appendix: Coverage Notes
 

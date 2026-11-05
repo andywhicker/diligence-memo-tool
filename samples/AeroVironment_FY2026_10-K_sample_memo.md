@@ -2,10 +2,10 @@
 
 | Field | Value |
 |---|---|
-| Company | AeroVironment (Delaware corporation, headquartered in Arlington, VA) (p. PDF 1) |
+| Company | AeroVironment, a Delaware corporation headquartered in Arlington, VA (p. PDF 1) |
 | Ticker / Status | NASDAQ: AVAV (public) (p. PDF 1) |
-| Source document | Annual report (Form 10-K) for fiscal year ended April 30, 2026; auditor report dated June 29, 2026 (pp. 50, 129) |
-| Fiscal period covered | Fiscal year ended April 30, 2026 (pp. 64, 65) |
+| Source document | Annual report for the fiscal year ended April 30, 2026 (pp. 50, 65) |
+| Fiscal period covered | Fiscal year ended April 30, 2026; fiscal year ends April 30 (pp. 64, 65) |
 | Memo generated | 2026-11-05 |
 | Pages processed | 138 of 138 PDF pages |
 
@@ -15,116 +15,130 @@
 
 ## 1. Executive Summary
 
-- **Business in one sentence:** AeroVironment designs, produces and supports autonomous systems, precision strike, counter-UAS (C-UAS), space-based platforms, directed energy, and cyber/EW capabilities, primarily for the DoD, other federal agencies and allied governments (p. 85).
-- **Scale:** FY2026 revenue was $1,976.8 million, total segment Adjusted EBITDA was $286.1 million, and GAAP operating loss was $(311.0) million (p. 65).
+- **Business in one sentence:** AeroVironment is a defense technology provider that designs, produces and supports autonomous systems, precision strike, counter-UAS, space-based platforms, directed energy, and cyber/EW capabilities, primarily for the DoD, other federal agencies and allied governments (p. 85).
+- **Scale:** FY2026 revenue was $1,976.8 million, total Segment Adjusted EBITDA was $286.1 million, and loss from operations was $(311.0) million (p. 65).
+  - FY2026 is not comparable to prior years because BlueHalo closed on May 1, 2025 and ESAero closed on March 16, 2026 (p. 127).
 - **Key positives (3):**
-  - The underlying business is growing. Calculated organic growth was 26.4% against reported growth of 140.9%, and legacy product revenue rose $196.6 million on LMS, MacCready Works and MUAS demand (calc.; pp. 66, 81, 116, 118).
-  - Margins in the core AxS segment expanded. Calculated AxS segment Adjusted EBITDA margin was 21.3% in FY2026 versus 17.8% in FY2025 (calc.; pp. 65, 123).
-  - The capital structure is low-cost. The only debt is $747.5 million of 0% convertible notes due 2030; calculated net leverage is 0.40x and liquidity is $969.1 million (calc.; pp. 35, 36, 65, 80, 84, 104, 105).
+  - Underlying growth is real: organic revenue growth was 26.4% (calc.), with legacy product revenue up $196.6 million on LMS, MacCready Works and MUAS demand (calc.; pp. 66, 81, 116, 118).
+  - The balance sheet was refinanced into $747.5 million of 0% convertible notes due 2030, leaving net leverage of 0.40x and liquidity of $969.1 million (calc.) (calc.; pp. 35, 36, 65, 80, 84, 104, 105).
+  - The core AxS segment earned a 21.3% Segment Adjusted EBITDA margin (calc.), and its Segment Adjusted EBITDA rose 97% to $288.7 million (calc.; pp. 65, 68).
 - **Key concerns (3):**
-  - Cash conversion is deeply negative. Calculated FCF was $(140.9) million, or -49.3% of Adj. EBITDA, after -14.2% in FY2025 and -6.0% in FY2024 (calc.; pp. 65, 66, 84).
-  - Add-backs are heavy. Calculated add-backs of $332.0 million bridge a GAAP EBITDA of $(46.0) million to Adj. EBITDA; excluding the impairment, add-backs still equal 31.9% of Adj. EBITDA (calc.; pp. 65, 81, 84, 118).
-  - _(uncited statement removed; see citation_log.md)_
-    - Deloitte issued an adverse ICFR opinion (p. 129).
-    - The company restated its 10-Q for the quarter ended January 31, 2026 (p. 128).
-    - Termination of the Space Force SCAR contract drove a $240.7 million goodwill impairment (p. 67).
-    - SCDE segment Adjusted EBITDA was $(2.6) million (p. 68).
-- **Biggest open question:** What is normalized cash conversion of the combined business? Specifically, how much of the FY2026 receivables, unbilled and inventory build reverses, and what does SCDE earn at steady state (calc.; pp. 65, 68, 72, 84)?
+  - Cash conversion is deeply negative: FY2026 free cash flow was $(140.9) million, or -49.3% of Adjusted EBITDA (calc.) (calc.; pp. 65, 84).
+  - The control environment is weak on three counts (pp. 76, 127, 128):
+    - Deloitte issued an adverse ICFR opinion. (pp. 76, 127, 128)
+    - The Q3 FY2026 10-Q was restated. (pp. 76, 127, 128)
+    - BlueHalo and ESAero, about 48% of revenue, were excluded from the ICFR assessment. (pp. 76, 127, 128)
+  - The acquired SCDE segment lost money at the Segment Adjusted EBITDA level ($(2.6) million), and the SCAR/BADGER termination drove a $240.7 million goodwill impairment and a securities class action (pp. 55, 67, 68).
+- **Biggest open question:** Why did $286.1 million of Segment Adjusted EBITDA convert to $(78.4) million of operating cash flow, and when will the $570.4 million of unbilled receivables bill and collect? (pp. 65, 80, 84)
 
 ## 2. Business Overview
 
-- **Segments:** Effective May 1, 2025, in connection with the BlueHalo acquisition, the company reports two segments: Autonomous Systems (AxS) and Space, Cyber and Directed Energy (SCDE) (p. 3).
-  - FY2026 segment revenue was $1,358.1 million for AxS and $618.8 million for SCDE; percentage split not disclosed (p. 65).
-  - AxS: Uncrewed Aircraft Systems $363.9 million, Precision Strike and Defense Systems $848.3 million, Other $145.9 million in FY2026 (p. 94).
-  - SCDE: Space and Directed Energy $273.4 million and Cyber and Mission Solutions $345.4 million in FY2026, with no revenue in prior years (p. 94).
-  - Precision Strike includes the Switchblade 300/400/600 loitering munitions, Blackwing, Red Dragon and Mayhem 10 (p. 4).
+- **Segments:** Effective May 1, 2025, in connection with BlueHalo, the company reports two segments: Autonomous Systems (AxS) and Space, Cyber and Directed Energy (SCDE) (p. 3).
+  - FY2026 segment revenue was $1,358.1 million for AxS and $618.8 million for SCDE (p. 65).
+  - Effective May 1, 2026, Autonomous R&D moved into SCDE, so future segment comparisons will shift again (p. 65).
+- **AxS:** The segment covers UAS, UUVs and ground robots. It combines the former UxS, LMS and MW segments with BlueHalo's IAMD, EW and UUV products (p. 85).
+  - Precision Strike includes the Switchblade 300, 400 and 600 loitering munitions, Red Dragon and the newly launched Mayhem 10 (p. 4).
   - IAMD includes the Titan RF counter-UAS family and the FE-1 kinetic interceptor (p. 4).
-  - SCDE directed energy includes the LOCUST laser weapon systems (p. 6).
-  - Effective May 1, 2026, Autonomous R&D moved into SCDE, which will affect segment comparability (p. 65).
+- **SCDE:** The segment provides space-based and ground-based platforms, cyber capabilities and directed energy systems, including LOCUST laser weapons (pp. 6, 85).
+  - The company has over 260 space-qualified hardware systems in orbit (p. 6).
+- **FY2026 revenue by operating group:**
+  - Precision Strike and Defense Systems: $848.3 million (p. 94).
+  - Uncrewed Aircraft Systems: $363.9 million (p. 94).
+  - Cyber and Mission Solutions: $345.4 million (p. 94).
+  - Space and Directed Energy: $273.4 million (p. 94).
+  - Other: $145.9 million (p. 94).
+- **Product trends:**
+  - Precision Strike and Defense Systems revenue rose from $192.6 million in FY2024 to $359.4 million in FY2025 (p. 94).
+  - Uncrewed Aircraft Systems revenue fell from $407.7 million in FY2024 to $352.0 million in FY2025 (p. 94).
 - **Business model:**
-  - Product sales were $1,415.3 million and contract services $561.5 million in FY2026, versus $692.7 million and $127.9 million in FY2025 (p. 81).
-  - Management expects the service share of revenue to remain higher following BlueHalo (p. 66).
-  - Over-time revenue recognition rose to 70% of revenue in FY2026 from 57% in FY2025 and 43% in FY2024 (p. 94).
-  - Customer-funded R&D revenue was $240.9 million in FY2026 versus $78.5 million in FY2025 (p. 96).
-  - A significant number of contracts typically run less than six months, which suggests a project/order-driven rather than recurring model (p. 61).
-- **Geography and end markets:**
-  - Domestic revenue was $1,420.4 million and international revenue $556.4 million in FY2026 (p. 94).
-  - Non-U.S. share of revenue fell to 28% in FY2026 from 52% in FY2025 and 62% in FY2024 (p. 125).
-  - International operations include Telerob in Stuttgart, Germany (UGV) and a business development office in Hampton Bishop, UK (p. 55).
-  - Major leased U.S. sites are Simi Valley, CA (~280,000 sq ft), Albuquerque, NM (~200,000), Huntsville, AL (~150,000) and Moorpark, CA (~150,000) (p. 55).
+  - FY2026 revenue was $1,415.3 million product sales and $561.5 million contract services (p. 81).
+  - Management expects the services share to remain higher after BlueHalo (p. 66).
+  - 70% of FY2026 revenue was recognized over time, versus 43% in FY2024 (p. 94).
+  - Customer-funded R&D revenue was $240.9 million in FY2026, versus $78.5 million in FY2025 (p. 96).
+  - A significant number of contracts typically run less than six months, which limits visibility (p. 61).
+- **Geographic footprint:**
+  - FY2026 revenue was $1,420.4 million domestic and $556.4 million international (p. 94).
+  - Major leased sites are Simi Valley, CA (about 280,000 sq ft), Albuquerque, NM (about 200,000 sq ft), Huntsville, AL (about 150,000 sq ft) and Moorpark, CA (about 150,000 sq ft) (p. 55).
+  - International sites are Hampton Bishop, UK and Stuttgart, Germany; Telerob is the German subsidiary (pp. 24, 55).
 - **Headcount:**
   - 3,991 full-time and 100 part-time employees as of April 30, 2026 (p. 10).
-  - 2,366 employees in R&D and engineering, and over 208 held a PhD (p. 10).
+  - 2,366 employees work in R&D and engineering, and over 208 hold PhDs (p. 10).
+  - Revenue per employee was $0.50 million (calc.) (calc.; pp. 10, 81).
   - Cleared headcount: Not disclosed.
-- **Ownership and history:**
-  - Incorporated in California in July 1971 and reincorporated in Delaware in 2006 (p. 14).
+- **History and M&A:**
+  - The company was incorporated in California in July 1971 and reincorporated in Delaware in 2006 (p. 14).
   - Serial acquirer: Arcturus and ISG (February 2021), Telerob (May 2021), Planck (August 2022), Tomahawk (September 2023), BlueHalo (May 2025) and ESAero (March 2026) (p. 32).
-  - BlueHalo closed May 1, 2025 for merger consideration, net of cash acquired, of $3,484.9 million, including 17,425,849 shares (pp. 49, 78).
-  - ESAero was acquired March 16, 2026 for an aggregate purchase price of $177.9 million (p. 115).
-  - In July 2025 the company issued 4,057,460 shares at $248.00 per share, alongside $747.5 million of convertible notes (p. 35).
+- **BlueHalo:** Closed May 1, 2025 for merger consideration, net of cash acquired, of $3,484.9 million, including 17,425,849 shares (pp. 49, 78).
+- **ESAero:** Acquired March 16, 2026 for an aggregate purchase price of $177.9 million, including 671,078 shares (p. 115).
+- **Ownership:**
   - Entities affiliated with Arlington Capital Partners beneficially own about 26.3% of common stock (p. 48).
-  - Both Arlington-nominated directors resigned effective June 17, 2026, with no replacements designated (p. 49).
-  - CFO transition: a retirement agreement with Kevin McDonnell is dated February 20, 2026 and an offer letter with Robert Smith is dated March 18, 2026 (p. 134).
+  - Arlington's two board nominees resigned effective June 17, 2026, and no replacements have been designated (p. 49).
+  - Shares outstanding rose from 28,267,517 to 50,610,514 over FY2026, driven by the BlueHalo share issuance and the July 2025 equity offering (pp. 80, 83).
+- **Management:** CFO transition is under way, with a retirement agreement with Kevin McDonnell (February 20, 2026) and an offer letter to Robert Smith (March 18, 2026) (p. 134).
 
 ## 3. Market & Competitive Position
 
 - **Market size:** Not disclosed.
-- **Named competitors:**
+- **Named competitors, by area:**
   - Loitering munitions: Textron, RTX, Lockheed Martin, Anduril, Aevex, SpektreWorks, Dragoon, Cummings Aerospace, Elbit and UVision (p. 9).
   - C-UAS and EW: Anduril, Boeing, Lockheed Martin, RTX, DroneShield, SRC, Polaris, CACI, Northrop Grumman and L3Harris (p. 9).
   - Space and directed energy: Boeing, Lockheed Martin, L3Harris, BAE Systems, nLIGHT, Epirus, EO Solutions, Huntington Ingalls and RTX (p. 9).
   - Cyber and mission solutions: L3Harris, Thales, Anduril, Sierra Nevada, Lockheed Martin, Booz Allen Hamilton and Leidos (p. 9).
-  - UAS: Elbit, Quantum-Systems, Redwire, Teledyne, Shield AI, Northrop Grumman, Anduril, Airbus and Israeli Aircraft Industries, among others (p. 20).
-- **Stated competitive advantages (management's view):**
+  - UAS: Elbit, Quantum-Systems, Redwire, Teledyne, Shield AI, Northrop Grumman, Airbus, Israeli Aircraft Industries and others (p. 20).
+- **Competitive advantages (management's view):**
   - Management believes no competitor matches the breadth and depth of its product lines or its core expertise (p. 9).
-  - Management states BlueHalo added RF, phased array, space electronics, laser communication, EW, directed energy and cyber capabilities (p. 9).
-  - IP and heritage: 407 U.S. patents and 64 pending applications, and over 260 space-qualified systems in orbit (pp. 6, 8).
-  - Manufacturing: ISO 9001:2015 + AS9100D certified facilities capable of producing thousands of systems annually (p. 10).
-  - Offsetting point: a significant portion of the technology is not patented, and the U.S. government holds licenses to IP developed under government contracts (p. 46).
+  - The company holds 407 U.S. patents and 64 pending applications (p. 8).
+  - A significant portion of its technology is not patented, and the U.S. government holds licenses to IP developed under government contracts (p. 46).
+  - Manufacturing is ISO 9001:2015 + AS9100D certified, and management says it can produce thousands of systems annually (p. 10).
 - **Regulatory and policy exposure:**
-  - **CMMC:** Failure to achieve the required certification would bar bidding on new DoD contracts containing CMMC clauses (p. 54).
-  - **Cyber investigation:** In February 2026 the company opened an external-counsel-led investigation into Legacy AV's cybersecurity compliance and the accuracy of its SPRS information (p. 45).
-  - **China:** China sanctioned the company in January 2024 and added it to its export control list in March 2025, while most rare earth metals used in its products come from China (p. 25).
-  - **Budget and politics:** DOGE review of Pentagon spending makes funding of U.S. government programs uncertain (p. 17).
-  - **Shutdown exposure:** Exposure to government shutdowns increased materially with BlueHalo (p. 18).
-  - **Termination for convenience:** All U.S. government contracts are terminable at will, and the military funds part of its contracts through operational needs statements rather than programs of record (p. 18).
-  - **C-UAS and domestic expansion:** RF and directed-energy C-UAS face stringent regulatory scrutiny, and non-military U.S. UAS/C-UAS expansion depends on FAA approvals (p. 43).
+  - **Budget:** DOGE review of Pentagon spending makes U.S. program funding uncertain (p. 17).
+  - **Funding mechanism:** A portion of contracts is funded through operational needs statements rather than programs of record, which gives less visibility (p. 18).
+  - **CMMC:** Failure to achieve the required CMMC level would bar bidding on new DoD contracts that carry CMMC clauses (p. 54).
+  - **Cyber compliance investigation:** In February 2026 the company opened an external-counsel-led internal investigation into Legacy AV's compliance with DoD cybersecurity requirements, including the accuracy of SPRS information. It is ongoing (p. 45).
+  - **China:** China sanctioned the company in January 2024 and added it to its export control list in March 2025, while most rare earth metals are sourced from China (p. 25).
+  - **Domestic non-military sales:** Expansion to non-military U.S. customers depends on FAA and other approvals (p. 43).
+  - **C-UAS deployment:** RF and directed-energy C-UAS face stringent regulatory scrutiny (p. 43).
+  - **Commercial-item status:** A dispute over commercial-item designation of products sold to the U.S. government could reduce profitability (p. 39).
+  - **U.S. export controls / ITAR:** Not disclosed.
 
 ## 4. Customers, Contracts & Backlog
 
-- **Top-customer concentration:**
-  - The U.S. government accounted for 85%, 75% and 76% of revenue in FY2026, FY2025 and FY2024 (p. 87).
-  - The U.S. Army alone accounted for 25%, 20% and 11% over the same years (p. 87).
-  - Ukraine was $149.6 million (18%) of FY2025 revenue and $274.1 million of FY2024 revenue (p. 125).
-  - No single foreign country exceeded 10% of FY2026 revenue (p. 8).
+- **Customer concentration:**
+  - U.S. government agencies accounted for 85%, 75% and 76% of revenue in FY2026, FY2025 and FY2024 (p. 87).
+  - The U.S. Army accounted for 25%, 20% and 11% of revenue in FY2026, FY2025 and FY2024 (p. 87).
   - Top-10 customer concentration: Not disclosed.
+- **Ukraine:**
+  - Ukraine was $149.6 million, or 18%, of FY2025 revenue and $274.1 million of FY2024 revenue (p. 125).
+  - No foreign country exceeded 10% of FY2026 revenue (p. 8).
+  - FY2025 UxS deliveries fell $62.1 million, mainly on lower sales to Ukraine (p. 68).
+- **International mix shift:** Non-U.S. customers, including FMS, fell from 62% of revenue in FY2024 to 52% in FY2025 and 28% in FY2026 (p. 125).
+  - The FY2026 drop also reflects the mostly domestic BlueHalo revenue base; the findings do not separate the two effects. (p. 125)
 - **Government exposure:**
   - The DoD accounted for about 63% of FY2026 revenue (p. 17).
-  - U.S. government agencies held 76% of accounts receivable at April 30, 2026 (p. 87).
-  - The company often acts as a subcontractor and expects to depend on prime contractors for a portion of revenue (p. 40).
+  - U.S. government sales, as prime or sub and including FMS, were about 85% (p. 17).
   - Other U.S. government agencies and government subcontractors accounted for 47% of FY2026 revenue (p. 7).
-  - Prime vs. sub revenue split: Not disclosed.
-- **Contract type mix:**
-  - FY2026: fixed-price 70.0%, cost-plus 23.0%, T&M 7.0% (calculated) (calc.; pp. 81, 94).
-  - FY2025: fixed-price 90.9%, cost-plus 8.3%, T&M 0.8% (calculated) (calc.; pp. 81, 94).
-  - The shift toward cost-plus is acquisition-driven. Management notes cost-plus margins are typically lower, so a shift toward cost-plus reduces operating margin (p. 26).
+- **Prime vs. sub:** The company often acts as a subcontractor and expects to depend on primes for a portion of revenue (p. 40).
+  - Prime vs. sub revenue split: Not disclosed. (p. 40)
+- **Contract type mix (calc.):**
+  - FY2026: fixed-price 70.0%, cost-plus 23.0%, T&M 7.0% (calc.; pp. 81, 94).
+  - FY2025: fixed-price 90.9% and cost-plus 8.3% (calc.; pp. 81, 94).
+  - The shift toward cost-plus coincides with BlueHalo, and management notes cost-plus margins are typically lower (pp. 18, 26).
 - **Backlog:**
-  - Funded backlog was $1,183.0 million at April 30, 2026 versus $726.6 million a year earlier (p. 11).
-  - Unfunded backlog was $1,457.7 million versus $774.6 million, with the increase primarily due to BlueHalo (p. 11).
-  - Calculated total backlog of $2,640.7 million covers 1.34x revenue, down from 1.83x (calc.; pp. 11, 81).
-  - Calculated funded backlog coverage fell to 0.60x from 0.89x (calc.; pp. 11, 81).
-  - The coverage decline partly reflects a larger, shorter-cycle services revenue base after BlueHalo, so years are not directly comparable (pp. 61, 66).
-  - About 85% of backlog is expected to convert to revenue in FY2027 (p. 11).
-  - Remaining performance obligations were $1,176.2 million at April 30, 2026 (p. 92).
+  - Funded backlog was $1,183.0 million at April 30, 2026, versus $726.6 million a year earlier (p. 11).
+  - Unfunded backlog was $1,457.7 million, versus $774.6 million, with the increase primarily due to BlueHalo (p. 11).
   - Unfunded backlog excludes unfunded IDIQ ceiling amounts (p. 11).
-  - No individual contract exceeded 10% of funded backlog (p. 7).
-  - Book-to-bill: Not disclosed.
-- **Key contracts and recompetes:**
-  - **SCAR termination:** The Space Force SCAR BADGER phased-array antenna OTA was stop-worked in January 2026 and terminated for convenience in March 2026 (p. 34).
-  - **FMS stop-work:** An earlier stop-work order on FMF-funded foreign military sales contracts was later lifted, and further stop-work orders or cancellations are possible (p. 19).
-  - **LMS revenue timing:** LMS revenue is recognized over time while the U.S. government is the only customer. It will shift to point-in-time once a direct commercial sale (DCS) contract is received, expected in FY2027 (p. 61).
-  - **Loss contract:** One IAMD contract carried a forward loss reserve of $3.9 million at April 30, 2026 (p. 93).
-  - Recompete and expiration schedule: Not disclosed.
+- **Backlog coverage weakened despite larger backlog (calc.):**
+  - Total backlog was $2,640.7 million, or 1.34x FY2026 revenue, versus 1.83x in FY2025 (calc.; pp. 11, 81).
+  - Funded backlog coverage fell to 0.60x from 0.89x (calc.; pp. 11, 81).
+- **RPO:** Remaining performance obligations were about $1,176.2 million, with about 85% expected to be recognized in FY2027 (p. 92).
+- **Concentration in backlog:** No individual contract exceeded 10% of funded backlog (p. 7).
+- **Book-to-bill:** Not disclosed.
+- **Key contracts and events:**
+  - **SCAR/BADGER:** The Space Force SCAR program OTA for BADGER phased array antennas was stop-worked in January 2026 and terminated for convenience in March 2026 (p. 34).
+  - **FMS stop-work:** FMF-funded foreign military sales contracts received a stop-work order, later lifted, because of shifting aid priorities (p. 19).
+  - **LMS revenue timing:** LMS revenue will move from over-time to point-in-time recognition once a DCS contract is received, which is expected in FY2027 (p. 61).
+  - **IAMD loss contract:** One IAMD contract carried a $3.9 million forward loss reserve (p. 93).
+  - **Recompete and expiration schedule:** Not disclosed.
 
 ## 5. Financial Summary
 
@@ -211,107 +225,94 @@
 
 **Commentary**
 
-- Reported FY2026 growth is dominated by BlueHalo: BlueHalo contributed $919.1 million of revenue since acquisition, and all SCDE revenue came from BlueHalo (pp. 68, 118).
-- On a BlueHalo pro forma basis, revenue was $1,663.3 million in FY2025 versus $1,976.8 million in FY2026 (p. 118).
-- Gross margin fell from 39% to 25% because of higher amortization and purchase accounting and a higher BlueHalo service mix (p. 66).
-  - Cost of sales included $92.7 million of non-cash purchase accounting in FY2026, versus $19.4 million in FY2025 (p. 66).
-  - Separately, legacy Switchblade mix added about $34 million to product cost (p. 66).
-- The $(311.0) million FY2026 operating loss includes a $240.7 million Space goodwill impairment (p. 65).
-- Total segment Adjusted EBITDA rose to $286.1 million from $146.4 million (p. 65).
-  - All of the increase came from AxS ($288.7 million); SCDE was $(2.6) million (p. 65).
-- FY2025 growth was driven by Switchblade revenue, up $164.7 million, partly offset by a $62.1 million drop in UxS deliveries tied to lower Ukraine sales (p. 68).
+- Reported FY2026 revenue grew 141%, mostly from acquisitions (p. 66):
+  - BlueHalo and ESAero contributed $526.0 million of the product revenue increase. (p. 66)
+  - BlueHalo contributed $413.2 million of service revenue. (p. 66)
+- Cost of sales grew 194%, faster than revenue, and gross margin fell from 39% to 25% (p. 66):
+  - Cost of sales included $92.7 million of intangible amortization and other non-cash purchase accounting. (p. 66)
+  - BlueHalo brought a higher services mix. (p. 66)
+- Legacy product margin also diluted: legacy product cost of sales rose about $34 million from mix shift toward lower-margin Switchblade production (p. 66).
+- The FY2026 operating loss of $(311.0) million was driven by non-cash acquisition charges (pp. 65, 67):
+  - a $240.7 million goodwill impairment; (pp. 65, 67)
+  - $126.4 million of added SG&A intangible amortization. (pp. 65, 67)
+- On a pro forma basis (as if BlueHalo were owned from May 1, 2024), the company lost money in both years (p. 118):
+  - Revenue rose from $1,663.3 million in FY2025 to $1,976.8 million in FY2026. (p. 118)
+  - Net losses were $(171.7) million and $(190.9) million. (p. 118)
+- FY2025 revenue grew 14%, with Switchblade up $164.7 million, partly offset by a $62.1 million UxS decline tied to Ukraine (p. 68).
 
 ## 6. Quality of Earnings Flags
 
-- **Adjusted EBITDA definition:** Segment Adjusted EBITDA is segment operating income before D&A, adjusted for the following items (p. 65):
-  - goodwill impairment; (p. 65)
-  - cloud computing implementation amortization; (p. 65)
-  - stock-based compensation; (p. 65)
-  - purchase accounting adjustments; (p. 65)
-  - acquisition-related expenses; (p. 65)
-  - "one-time" items such as legal expense. (p. 65)
-- **FY2026 add-backs (as disclosed):**
-  - D&A: $265.0 million, including $223.1 million of amortization (pp. 84, 122).
-  - Goodwill impairment: $240.7 million (p. 65).
-  - Acquisition-related expenses: $48.2 million (p. 122).
-  - Stock-based compensation: $38.3 million (p. 122).
-  - Cloud computing implementation amortization: $5.5 million (p. 122).
-  - Equity securities activity: deducted $(11.7) million (p. 122).
-  - Calculated total add-backs from GAAP EBITDA were $332.0 million (calc.; pp. 65, 81, 84).
-  - Excluding the impairment, calculated add-backs equal 31.9% of Adj. EBITDA (calc.; pp. 65, 81, 84, 118).
-  - The itemized add-backs above do not obviously tie to the calculated bridge, so a full reconciliation should be requested (calc.; pp. 65, 81, 84, 122).
-- **FY2025 add-backs (as disclosed):**
-  - Goodwill impairment $18.4 million, acquisition-related $19.3 million, SBC $21.5 million and legal $2.1 million (p. 123).
-  - Calculated total add-backs were $64.6 million (calc.; pp. 65, 81, 84).
-- **Recurring "acquisition" costs:** Acquisition-related expenses were added back in both FY2025 and FY2026, and cumulative BlueHalo acquisition and integration expenses reached about $64.2 million (pp. 118, 122, 123). Given the company's serial acquisition history, these look recurring rather than one-time (p. 32).
-- **Capitalized costs that support EBITDA:**
-  - Capitalized cloud computing costs rose to $46.2 million from $33.7 million; their amortization is added back (p. 88).
-  - Capitalized software to be sold rose to $27.4 million from $3.3 million (p. 88).
-- **One-time and non-recurring items:**
-  - FY2026 included $11.7 million of realized gains on equity securities sales (p. 67).
-  - FY2026 included $6.7 million of term-loan debt issuance costs expensed on repayment (p. 67).
-  - FY2026 equity method income from limited partnership funds was $17.4 million, versus $4.8 million in FY2025 (p. 65).
-  - FY2025 included the UGV goodwill impairment of $18.4 million and $4.3 million of accelerated intangible amortization (p. 33).
-  - A California Labor Code class action settlement was accrued in FY2025 results, pending court approval (p. 56).
+- **EBITDA definition:** Segment Adjusted EBITDA is the CODM's profitability measure (p. 65):
+  - It starts from segment operating income before D&A. (p. 65)
+  - It adds back goodwill impairment, cloud computing implementation amortization, stock-based compensation, purchase accounting adjustments, acquisition-related expenses and one-time items such as legal expense. (p. 65)
+- **PRSU incentives:** PRSUs vest on revenue and non-GAAP adjusted EBITDA targets, so management pay is tied to the adjusted measure (p. 109).
+- **Add-back intensity (calc.):**
+  - FY2026 GAAP EBITDA was $(46.0) million, versus $286.1 million of Adjusted EBITDA (calc.; pp. 65, 81, 84).
+  - Total add-backs were $332.0 million in FY2026, versus $64.6 million in FY2025 (calc.; pp. 65, 81, 84).
+  - Excluding the goodwill impairment, add-backs were still 31.9% of Adjusted EBITDA (calc.; pp. 65, 81, 84, 118).
+- **Non-GAAP adjustments disclosed:**
+  - Goodwill impairment: $240.7 million in FY2026, entirely in SCDE (p. 122).
+  - Acquisition-related expenses: $48.2 million in FY2026 and $19.3 million in FY2025 (pp. 122, 123).
+  - Stock-based compensation: $38.3 million in FY2026 and $21.5 million in FY2025 (pp. 122, 123).
+  - Cloud computing implementation amortization: $5.5 million in FY2026 (p. 122).
+  - Equity securities gains deducted: $(11.7) million in FY2026 (p. 122).
+  - Legal expense: $2.1 million in FY2025 (p. 123).
+  - Purchase accounting adjustments in SG&A: $130.4 million in FY2026, within total intangible amortization and purchase accounting of $223.1 million (p. 66).
+- **Recurring "one-time" acquisition costs:** Acquisition costs recur every year in a serial-acquirer model, so treating them as one-time is debatable (pp. 118, 120, 122, 123):
+  - Tomahawk: $1.9 million in FY2024. (pp. 118, 120, 122, 123)
+  - BlueHalo cumulative: about $64.2 million, including integration. (pp. 118, 120, 122, 123)
+- **Ongoing amortization:** Estimated intangible amortization is $173.0 million in FY2027, which will keep GAAP results depressed (p. 101).
+- **Non-recurring items below operating income:**
+  - Realized gains on equity securities: $11.7 million in FY2026 (p. 67).
+  - Equity method (LP fund) income: $17.4 million, versus $4.8 million in FY2025 (p. 65).
+  - Unamortized Term Loan issuance costs expensed: $6.7 million (p. 67).
+- **FY2025 one-time items:**
+  - UGV goodwill impairment of $18.4 million and accelerated UGV intangible amortization of $4.3 million (p. 33).
+  - A California Labor Code / PAGA class action settlement was accrued in FY2025, pending court approval (p. 56).
 - **Revenue recognition:**
-  - Contract estimates (cost-to-cost, variable consideration, cumulative catch-ups) are a critical audit matter (p. 76).
-  - Net cumulative catch-up adjustments swung to $(2.6) million in FY2026 from $6.0 million in FY2025 and $5.4 million in FY2024 (p. 62).
-  - FY2026 gross unfavorable catch-ups were $16.9 million across 25 contracts, including a $(3.1) million Cyber and Mission Solutions contract (p. 62).
-  - FY2025 revenue benefited from $9.9 million of catch-ups on definitization of four LMS undefinitized contract actions (p. 62).
+  - Over-time recognition rose to 70% of revenue in FY2026, from 57% in FY2025 and 43% in FY2024 (p. 94).
+  - Deloitte flagged contract estimates as a critical audit matter: cost-to-cost, variable consideration and cumulative catch-ups (p. 76).
+  - Net cumulative catch-up adjustments swung to $(2.6) million in FY2026, from +$6.0 million in FY2025 and +$5.4 million in FY2024 (p. 62).
+  - FY2026 gross unfavorable adjustments were $16.9 million across 25 contracts (p. 62).
+  - FY2025 benefited from $9.9 million of catch-up revenue on definitization of four LMS undefinitized contract actions (p. 62).
   - Forward loss reserves rose to $6.1 million from $0.1 million (p. 93).
-  - The expected FY2027 shift of LMS to point-in-time recognition could change revenue timing (p. 61).
+  - The expected FY2027 switch of LMS to point-in-time recognition could shift revenue timing (p. 61).
 - **Working capital:**
-  - FY2026 uses of cash: receivables $(128.7) million, unbilled receivables $(159.0) million and inventories $(111.6) million (p. 84).
-  - Unbilled receivables and retentions were $570.4 million versus $290.0 million (p. 80).
-  - Calculated DSO including unbilled was 164 days (versus 174), and calculated DIO was 77 days (versus 105). Both are elevated despite acquired mix (calc.; pp. 80, 81).
-  - The inventory E&O reserve rose to $36.6 million from $28.7 million (p. 126).
-  - A $100 million receivables purchase facility exists but was unused at April 30, 2026. Any future use would flatter operating cash flow (p. 71).
+  - FY2026 operating cash used for working capital was $(128.7) million for receivables, $(159.0) million for unbilled receivables and $(111.6) million for inventories (p. 84).
+  - Unbilled receivables and retentions rose to $570.4 million from $290.0 million (p. 80).
+  - DSO including unbilled was 164 days in FY2026, versus 174 in FY2025 (calc.) (calc.; pp. 80, 81).
+  - DIO was 77 days, versus 105 (calc.) (calc.; pp. 80, 81).
+  - The inventory excess and obsolescence reserve rose to $36.6 million from $28.7 million (p. 100).
+  - A $100 million receivables purchase facility with Citibank was undrawn at year-end (p. 71).
+- **Cash taxes:** Cash taxes paid fell to $3.6 million from $24.6 million, helped by OBBBA R&D expensing, which flatters near-term cash flow (pp. 26, 113).
 - **Auditor and material weaknesses:**
-  - Deloitte (auditor since fiscal 2020) issued an unqualified opinion on the FY2026 financial statements (pp. 79, 129).
-  - Deloitte issued an adverse opinion on ICFR as of April 30, 2026 (p. 129).
-  - The two material weaknesses are ineffective goodwill impairment analysis controls and ineffective IT general controls at BlueHalo (p. 130).
-  - The goodwill weakness caused an error that required restating the quarter ended January 31, 2026 (Form 10-Q/A filed June 22, 2026) (p. 128).
-  - BlueHalo and ESAero (46% of total assets, 48% of revenue) were excluded from the ICFR assessment, so control coverage of the acquired business is untested (p. 129).
-  - BlueHalo separately identified three material weaknesses for calendar 2024, one of which remained at April 30, 2026 (pp. 50, 51).
+  - Deloitte, auditor since fiscal 2020, issued an unqualified opinion on the FY2026 financial statements but an adverse opinion on ICFR (pp. 79, 129).
+  - The two material weaknesses are ineffective design of goodwill impairment analysis controls and ineffective GITCs for BlueHalo IT systems (p. 130).
+  - The goodwill weakness caused restatement of the quarter ended January 31, 2026 via a Form 10-Q/A filed June 22, 2026 (p. 128).
+  - BlueHalo and ESAero (about 46% of assets and 48% of revenue) were excluded from the ICFR assessment (p. 127).
   - The CEO and CFO concluded disclosure controls were not effective (p. 127).
-- **Goodwill risk:**
-  - Space reporting unit goodwill of about $291 million remains after the impairment (p. 63).
-  - BlueHalo and ESAero reporting units were recently recorded at fair value and are exposed to future impairment (p. 63).
+- **Balance sheet intangibles:** Goodwill of $2,493.7 million and intangibles of $929.8 million sit against total equity of $4,400.4 million (p. 80).
+  - The Space reporting unit retains about $291 million of goodwill (p. 90).
 
-## 7. LBO Inputs
+## 7. Key Risks
 
-| Input | Value | Cite |
-|---|---|---|
-| Base-year revenue | FY2026 $1,976.8M; pro forma incl. ESAero $2,056.2M | (pp. 65, 116) |
-| Base-year EBITDA (reported / adjusted) | GAAP EBITDA (calc.) $(46.0)M / total segment Adj. EBITDA $286.1M | (calc.; pp. 65, 81, 84) |
-| D&A | $265.0M total; depreciation $35.8M per PP&E note vs. $41.9M per segment note; FY2027 est. intangible amortization $173.0M | (pp. 84, 101, 103, 122) |
-| Capex (maintenance vs. growth, if split) | $62.5M per cash flow statement vs. $86.2M per segment note (the segment figure may include $23.7M of capitalized software to be sold); maintenance/growth split Not disclosed | (pp. 84, 125) |
-| Capex commitment | Planned purchase of Huntsville, AL building for $16.3M (notice given May 2026) | (p. 71) |
-| Net working capital (or change in NWC) | Change in operating assets and liabilities was $236.6M worse YoY; AR $(128.7)M, unbilled $(159.0)M, inventories $(111.6)M uses of cash | (pp. 72, 84) |
-| Cash tax rate / effective tax rate | ETR 7.5% (FY2026) / 2.2% (FY2025); cash taxes paid $3.6M vs. $24.6M; federal NOLs $180.3M, potentially limited by Section 382 | (pp. 67, 112, 113) |
-| Existing debt: convertible notes | $747.5M 0% Convertible Senior Notes due July 15, 2030; conversion price ~$322.40; cash settlement required up to principal | (p. 35) |
-| Existing debt: revolver | $350.0M commitment, undrawn; ~$336.8M available after $13.2M of LCs; maturity October 4, 2029 | (pp. 35, 71, 74, 104) |
-| Existing debt: Telerob line | €2.2M ($2.6M) drawn on a €9.0M line | (p. 71) |
-| Cash | Cash $377.3M + short-term investments $255.0M = $632.3M (calc.); long-term investments $81.1M | (calc.; pp. 80, 84) |
-| Other debt-like items | Operating lease liabilities (PV) $105.8M; purchase obligations $680.2M, of which $662.7M due within one year | (pp. 73, 107) |
-| Shares | 50,608,030 shares outstanding at June 24, 2026; closing price $142.18 that day | (pp. 56, PDF 1) |
-| Management projections | Not disclosed (annual report). Only forward indicator: ~85% of backlog expected to convert in FY2027 | (p. 11) |
+1. **Cash generation does not track adjusted earnings.** OCF went from $15.3 million (FY2024) to $(1.3) million (FY2025) to $(78.4) million (FY2026), and FY2026 FCF was -49.3% of Adjusted EBITDA (calc.). Any valuation built on Adjusted EBITDA needs a cash bridge (calc.; pp. 65, 84).
+2. **Financial reporting reliability.** An adverse ICFR opinion, a restated quarter, and roughly 48% of revenue outside ICFR scope reduce confidence in the reported numbers, especially for the acquired businesses (pp. 76, 127, 128).
+3. **BlueHalo/SCDE underperformance and further impairment.** Three indicators point the same way, and recently fair-valued BlueHalo and ESAero units are exposed to future material impairments (pp. 63, 68, 90, 118):
+   - SCDE Segment Adjusted EBITDA was $(2.6) million. (pp. 63, 68, 90, 118)
+   - BlueHalo's FY2026 loss from operations was $(365.5) million. (pp. 63, 68, 90, 118)
+   - Space goodwill of about $291 million remains on the balance sheet. (pp. 63, 68, 90, 118)
+4. **Litigation and compliance.** Either issue could affect DoD eligibility or result in damages (pp. 45, 55):
+   - A May 26, 2026 securities class action alleges misleading SCAR statements by the CEO, the former CFO and the SCDE president. (pp. 45, 55)
+   - An ongoing investigation into Legacy AV cybersecurity/SPRS compliance raises CMMC, penalty and debarment exposure. (pp. 45, 55)
+5. **U.S. government funding concentration.** 85% of revenue comes from the U.S. government. All contracts are terminable at will, and BlueHalo materially increased shutdown exposure (pp. 18, 87).
+6. **Supply chain dependence on China.** A significant majority of rare earth metals comes from China, which has sanctioned the company. The company also relies on sole-source suppliers and faces volatile memory component pricing (p. 25).
+7. **Margin pressure from mix.** Two mix effects lower margins (calc.; pp. 26, 66, 81, 94):
+   - Cost-plus rose to 23.0% of revenue from 8.3% (calc.), and cost-plus margins are typically lower. (calc.; pp. 26, 66, 81, 94)
+   - Higher Switchblade production shifted legacy mix toward lower-margin products. (calc.; pp. 26, 66, 81, 94)
+8. **Convertible note cash-settlement obligation.** The $747.5 million notes must be settled in cash up to principal on conversion and mature July 15, 2030. The $322.40 conversion price is well above the $142.18 June 24, 2026 share price, so principal repayment in cash is the likely outcome (pp. 35, 56).
 
-## 8. Key Risks
-
-1. **Cash generation does not track Adjusted EBITDA.** Operating cash flow was $(78.4) million in FY2026 and calculated FCF was $(140.9) million despite $286.1 million of Adj. EBITDA, so EBITDA-based debt capacity may be overstated (calc.; pp. 65, 72, 84).
-2. **Unreliable financial reporting.** An adverse ICFR opinion, a restated quarter, and the exclusion of 48% of revenue from ICFR testing mean the numbers themselves need independent QoE verification (pp. 127, 128, 129).
-3. **The SCDE / Space thesis is impaired.** SCAR's termination drove a $240.7 million impairment, SCDE Adjusted EBITDA was $(2.6) million, and about $291 million of Space goodwill remains at risk (pp. 63, 67, 68).
-   - Management says Space now needs higher R&D and capital investment to commercialize (p. 102).
-4. **Litigation and compliance overhang.**
-   - A securities class action filed May 26, 2026 alleges misleading SCAR disclosures (p. 55).
-   - The ongoing cybersecurity/SPRS investigation could, under CMMC rules, lead to penalties or suspension/debarment (p. 45).
-5. **Government funding concentration and volatility.** The U.S. government is 85% of revenue, contracts are terminable at will, and funding relies partly on operational needs statements, so a budget or DOGE-driven cut flows directly to revenue (pp. 17, 18, 87).
-6. **Volatile demand linked to specific conflicts.** International share fell from 62% to 28% in two years and Ukraine revenue dropped sharply, so legacy demand depends on episodic conflict-driven orders (p. 125).
-7. **Convertible note cash call.** Conversions must be settled in cash up to principal, which could require significant cash outlays and harm liquidity. Conditions before April 15, 2030 are largely outside the company's control (pp. 35, 37).
-8. **Supply chain exposure to China.** Most rare earth metals come from China, which has sanctioned the company and placed it on its export control list. Memory component pricing is also volatile (p. 25).
-
-## 9. Consistency Check
+## 8. Consistency Check
 
 | Narrative claim | Cite | What the numbers show | Cite | Flag |
 |---|---|---|---|---|
@@ -330,47 +331,57 @@
 | Capital expenditures (purchases of property and equipment) were $62.5 million in FY2026 and $22.8 million in FY2025. | (p. 72) | Capital expenditures were $86,218 thousand in FY2026 (AxS $50,780, SCDE $29,380, Corporate $6,058). | (p. 125) | **Needs explanation**: Code check: the same line item (Capex, FY2026) is stated with values that differ by $23.7M (calc.), more than rounding allows. Confirm which figure is right: a typo, a restatement, or a different definition. |
 | SG&A expense was $443.0 million, or 22% of revenue | (p. 66) | SG&A was $443,251 thousand in FY2026. | (p. 65) | **Needs explanation**: Code check: the same line item (SG&A, FY2026) is stated with values that differ by $0.3M (calc.), more than rounding allows. Confirm which figure is right: a typo, a restatement, or a different definition. |
 
-## 10. Questions for Management
+## 9. Questions for Management
 
 **Financial**
 
-1. Provide a full bridge from GAAP operating income to the $286.1 million total segment Adjusted EBITDA, including every purchase accounting and "one-time" item. The disclosed add-backs do not obviously tie to the calculated total (calc.; pp. 65, 81, 84).
-2. What is normalized FCF for the combined business? How much of the $(128.7) million receivables, $(159.0) million unbilled and $(111.6) million inventory build reverses in FY2027 (p. 84)?
-3. Why are acquisition-related expenses ($48.2 million in FY2026, $19.3 million in FY2025) treated as non-recurring given the company's ongoing acquisition program (pp. 122, 123)?
-4. Why is the cloud computing implementation amortization add-back justified, given capitalized cloud costs of $46.2 million? Why did capitalized software to be sold rise to $27.4 million (p. 88)?
-5. Reconcile FY2026 capex of $62.5 million (cash flow statement) with $86.2 million (segment note), and depreciation of $35.8 million (PP&E note) with $41.9 million (segment note) (pp. 84, 103, 122, 125).
-6. Reconcile goodwill of $2,583.1 million cited in the narrative with $2,493.7 million on the balance sheet. Does the difference relate to the restated goodwill carrying value error (pp. 34, 51, 80)?
-7. What is the split of capex between maintenance and growth, and what capacity expansion is planned with the offering proceeds (maintenance/growth split not disclosed) (p. 70)?
-8. Provide management projections and FY2027 guidance by segment, which are not included in the annual report.
-9. What is the Section 382 limitation on the $180.3 million of federal NOLs, and what is the expected cash tax rate under OBBBA R&D expensing (pp. 26, 112)?
-10. What are the timeline and cost to remediate the goodwill-control and BlueHalo IT general control material weaknesses? What did the January 31, 2026 quarter restatement change (pp. 128, 130)?
+1. Provide a bridge from FY2026 Segment Adjusted EBITDA of $286.1 million to operating cash flow of $(78.4) million (pp. 65, 84).
+2. What is the billing and collection schedule for the $570.4 million of unbilled receivables? (p. 80)
+3. Reconcile FY2026 capex of $62.5 million in the cash flow statement with $86.2 million in segment disclosures (pp. 84, 125).
+4. Reconcile FY2025 capex of $19.5 million with the $22.8 million cited in MD&A and segment data (pp. 84, 125).
+5. Reconcile goodwill of $2,583.1 million cited in MD&A with $2,493.7 million on the balance sheet (pp. 34, 80).
+6. Reconcile depreciation of $35.8 million (PP&E note) with $41.9 million (segment note) (pp. 103, 122).
+7. Reconcile amortization of $204.0 million with $223.1 million (pp. 100, 122).
+8. What is in the $130.4 million of purchase accounting adjustments in SG&A beyond intangible amortization, and will any of it recur? (p. 66)
+9. Break out the $48.2 million of FY2026 acquisition-related add-backs into transaction vs. integration costs, and give the expected run-off (pp. 118, 122).
+10. What is the path for SCDE from $(2.6) million Segment Adjusted EBITDA to breakeven? (p. 68)
+11. Which programs drove the negative SCDE Segment Adjusted EBITDA?
+12. What drove the $16.9 million of unfavorable EAC adjustments across 25 contracts? (p. 62)
+13. Is the IAMD forward-loss contract ($3.9 million reserve) isolated? (p. 93)
+14. What is the expected FY2027 revenue timing impact of moving LMS to point-in-time recognition? (p. 61)
+15. What are the maximum leverage and minimum fixed charge coverage covenant levels, and how much headroom does the company have? (pp. 36, 104)
+16. How does the company plan to fund cash settlement of the $747.5 million notes at maturity or on conversion? (p. 35)
+17. What are the cash tax expectations post-OBBBA, and are federal NOLs of $180.3 million subject to Section 382 limits? (p. 112)
 
 **Customers & Contracts**
 
-11. Provide revenue by top-10 customer and program, which is not disclosed.
-12. Provide the prime vs. subcontractor revenue split, which is not disclosed.
-13. Provide book-to-bill by segment for FY2025 and FY2026, which is not disclosed.
-14. Provide the recompete and expiration schedule for the largest contracts, which is not disclosed.
-15. What revenue and backlog did SCAR/BADGER represent, and what is the plan for the Space unit after termination (pp. 34, 102)?
-16. How was funded backlog of $1,183.0 million derived relative to remaining performance obligations of $1,176.2 million, and what explains the decline in funded backlog coverage (calc.; pp. 11, 81, 92)?
-17. What is the expected revenue-timing impact when LMS moves to point-in-time recognition on receipt of a DCS contract in FY2027 (p. 61)?
-18. How much of the legacy LMS/Switchblade growth is tied to specific conflicts or resupply, and what is the outlook for international SUAS sales (pp. 66, 68)?
-19. What is SCDE's path to positive Adjusted EBITDA from $(2.6) million, and how will the May 1, 2026 move of Autonomous R&D into SCDE affect segment reporting (pp. 65, 68)?
+18. What share of revenue came from the top-10 customers in each of the last three years? (Not disclosed)
+19. What were book-to-bill ratios by segment for FY2025 and FY2026? (Not disclosed)
+20. What share of revenue is prime vs. subcontract, and who are the largest primes? (Not disclosed) (p. 40)
+21. What termination-for-convenience settlement is expected on SCAR/BADGER, and what Space unit assumptions support the remaining goodwill of about $291 million? (pp. 34, 90)
+22. How sustainable is international demand after the non-U.S. revenue share fell from 62% to 28%? (p. 125)
+23. What is the current status of the FMF-funded FMS contracts that were stop-worked? (p. 19)
+24. What share of unfunded backlog of $1,457.7 million is option-based or at risk of non-exercise? (p. 11)
 
 **Operations**
 
-20. What is the current headcount holding security clearances (not disclosed)?
-21. What is the status and potential exposure of the Legacy AV cybersecurity/SPRS investigation, and what CMMC level does each business hold (pp. 45, 54)?
-22. How is rare earth supply being diversified given China's sanctions and export control listing (p. 25)?
-23. What drove the forward loss reserve increase to $6.1 million, including the $3.9 million IAMD contract (p. 93)?
+25. How many employees hold security clearances, by level? (Not disclosed)
+26. What has the company done to mitigate the Chinese rare earth dependence, and how much inventory is on hand? (p. 25)
+27. What is the remediation timeline and cost for the two material weaknesses? (p. 128)
+28. When will BlueHalo be brought within ICFR scope? (p. 50)
+29. What cost synergies are targeted from BlueHalo and ESAero, and how much has been achieved to date? (p. 22)
+30. What manufacturing capacity expansion is planned with the remaining offering proceeds, and what is the expected capex? (p. 70)
 
 **Other**
 
-24. What is the addressable market size by segment (not disclosed)?
-25. What triggers early conversion of the $747.5 million notes (for example, fundamental change provisions), and how would a change of control affect cash settlement (pp. 35, 37)?
-26. Why did both Arlington-nominated directors resign, and what are Arlington's intentions for its 26.3% stake (pp. 48, 49)?
-27. What is the status of the May 26, 2026 securities class action, and are any other SCAR-related claims expected (p. 55)?
-28. What drove the CFO transition, and are key executives subject to retention arrangements, given the company has no executive employment agreements (pp. 27, 134)?
+31. What is management's estimate of addressable market size by product line? (Not disclosed)
+32. Does the business have ITAR or U.S. export-control exposure, and are there any open voluntary disclosures? (Not disclosed)
+33. What are the scope, preliminary findings and potential DoD consequences of the Legacy AV cybersecurity/SPRS investigation? (p. 45)
+34. What is the current CMMC certification status? (p. 54)
+35. What is the status and defense posture of the SCAR securities class action? (p. 55)
+36. Why did Arlington's directors resign, and what are Arlington's intentions for its 26.3% stake? (pp. 48, 49)
+37. What is the status of the lock-up on BlueHalo consideration shares? (p. 49)
+38. What prompted the CFO transition? (p. 134)
 
 ## Appendix: Coverage Notes
 
