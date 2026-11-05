@@ -625,7 +625,8 @@ def build_guide(wb, data: dict, m: Model):
         ("Yellow fill: key assumption or placeholder to set", "fill"),
         ("", None),
         ("Status", None),
-        ("Tabs in this version: Guide, Historicals, Assumptions, Bridge, Sources & Uses, Model, Returns. Checks come next.", None),
+        ("Tabs: Historicals, Assumptions, Cases (if a management case or consensus file exists), Bridge, "
+         "Sources & Uses, Model, Returns, Checks. The overall check status is shown at the top of this tab.", None),
         ("Sponsor equity: strip of PIK preferred and common (or all common); management options dilute the common only.", None),
         ("Model simplifications: interest on beginning-of-year balances (no circular reference); depreciation excludes "
          "acquired-intangible amortization (understates the tax shield); NOLs offset taxable income without annual limits.", None),
@@ -1043,6 +1044,80 @@ def build_returns(wb, data: dict, m: Model):
     return ws
 
 
+# ---- Checks ----------------------------------------------------------------------
+def build_checks(wb, data: dict, m: Model):
+    """Integrity checks, each OK / CHECK, with an overall status mirrored on the Guide tab."""
+    from openpyxl.formatting.rule import CellIsRule, FormulaRule
+
+    ws = wb.create_sheet("Checks")
+    title(ws, "Model checks", "Every check should read OK. Any CHECK means an input combination broke an invariant; "
+                              "the Detail column shows the value tested.")
+    a, R = m.a, m.model_rows
+    cols = [m.proj_cols[y] for y in m.proj_years]
+    first, last = cols[0], cols[-1]
+    rng = lambda key: f"Model!${first}${R[key]}:${last}${R[key]}"   # noqa: E731
+    tol = 0.001
+    checks = [
+        ("Sources equal uses", f"=ABS({a['su_check']})<{tol}", f"={a['su_check']}", "money"),
+        ("Cash never below the minimum", f"=MIN({rng('cash_end')})>={a['min_cash']}-{tol}",
+         f"=MIN({rng('cash_end')})", "money"),
+        ("Term loan never negative", f"=MIN({rng('tlb_end')})>=-{tol}", f"=MIN({rng('tlb_end')})", "money"),
+        ("Revolver between zero and its commitment",
+         f"=AND(MIN({rng('rcf_end')})>=-{tol},MAX({rng('rcf_end')})<={a['rcf_size']}+{tol})",
+         f"=MAX({rng('rcf_end')})", "money"),
+        ("NOL balance never negative", f"=MIN({rng('nol_end')})>=-{tol}", f"=MIN({rng('nol_end')})", "money"),
+        ("Preferred paid no more than its accreted value", "=Returns!$C$27<=Returns!$C$25+0.001",
+         "=Returns!$C$27-Returns!$C$25", "money"),
+        ("Waterfall ties: preferred + sponsor common + management = exit equity",
+         "=ABS(Returns!$C$27+Returns!$C$30-Returns!$C$29-MAX(Returns!$C$26,0))<0.001",
+         "=Returns!$C$27+Returns!$C$30-Returns!$C$29-MAX(Returns!$C$26,0)", "money"),
+        ("Value-creation bridge adds up", "=ABS(SUM(Returns!$C$42:$C$45)-Returns!$C$46)<0.001",
+         "=SUM(Returns!$C$42:$C$45)-Returns!$C$46", "money"),
+        ("Sensitivity shift cells are zero (Returns tab)", "=SUMPRODUCT(ABS(Returns!$C$6:$C$9))=0",
+         "=SUMPRODUCT(ABS(Returns!$C$6:$C$9))", "money"),
+        ("Exit year falls inside the projection", "=ISNUMBER(Returns!$C$13)", "=Returns!$C$13", "count"),
+        ("Sensitivity grid center equals headline IRR", "=ABS(Returns!$E$57-Returns!$C$35)<0.0000001",
+         "=Returns!$E$57-Returns!$C$35", "pct"),
+    ]
+    if m.case:
+        checks.append(("Case revenue and EBITDA are positive every year",
+                       f"=AND(MIN(Cases!${first}$25:${last}$25)>0,MIN(Cases!${first}$26:${last}$26)>0)",
+                       f"=MIN(Cases!${first}$26:${last}$26)", "money"))
+    header_row(ws, 6, ["Check", "Status", "Detail"])
+    for i, (label, test, detail, kind) in enumerate(checks, start=7):
+        ws.cell(row=i, column=1, value=label).font = font()
+        cell(ws, f"B{i}", f'=IF(ISERROR({test[1:]}),"CHECK",IF({test[1:]},"OK","CHECK"))', None, BLACK, bold=True)
+        ws[f"B{i}"].alignment = Alignment(horizontal="center")
+        cell(ws, f"C{i}", f"=IFERROR({detail[1:]},\"n/a\")", kind, GRAY)
+    last_row = 6 + len(checks)
+    ws["A4"] = "Overall"
+    ws["A4"].font = font(NAVY, bold=True, size=11)
+    cell(ws, "B4", f'=IF(COUNTIF(B7:B{last_row},"CHECK")=0,"ALL OK",COUNTIF(B7:B{last_row},"CHECK")&" CHECK(S)")',
+         None, BLACK, bold=True)
+    ws["B4"].alignment = Alignment(horizontal="center")
+    green, red = PatternFill("solid", fgColor="C6EFCE"), PatternFill("solid", fgColor="FFC7CE")
+    ws.conditional_formatting.add(f"B7:B{last_row}", CellIsRule(operator="equal", formula=['"OK"'], fill=green))
+    ws.conditional_formatting.add(f"B7:B{last_row}", CellIsRule(operator="equal", formula=['"CHECK"'], fill=red))
+    ws.conditional_formatting.add("B4", FormulaRule(formula=['B4="ALL OK"'], fill=green))
+    ws.conditional_formatting.add("B4", FormulaRule(formula=['B4<>"ALL OK"'], fill=red))
+    m.a["checks_overall"] = "Checks!$B$4"
+
+    # mirror the overall status at the top of the Guide tab
+    g = wb["Guide"]
+    g["B1"] = "Model checks:"
+    g["B1"].font = font(GRAY, bold=True)
+    g["C1"] = "=Checks!$B$4"
+    g["C1"].font = font(bold=True)
+    g.conditional_formatting.add("C1", FormulaRule(formula=['C1="ALL OK"'], fill=green))
+    g.conditional_formatting.add("C1", FormulaRule(formula=['C1<>"ALL OK"'], fill=red))
+    g.column_dimensions["B"].width = 14
+    g.column_dimensions["C"].width = 14
+    ws.column_dimensions["A"].width = 64
+    ws.column_dimensions["B"].width = 12
+    ws.column_dimensions["C"].width = 14
+    return ws
+
+
 def build(data: dict, out_path) -> Model:
     wb = Workbook()
     m = Model()
@@ -1058,5 +1133,6 @@ def build(data: dict, out_path) -> Model:
     build_sources_uses(wb, data, m)
     build_projection(wb, data, m)
     build_returns(wb, data, m)
+    build_checks(wb, data, m)
     wb.save(out_path)
     return m

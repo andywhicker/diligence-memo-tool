@@ -86,6 +86,32 @@ def check(path, ops=None) -> dict:
     return result
 
 
+def scrub(path) -> None:
+    """
+    Remove personal metadata Excel adds on save: the absolute folder path it saved from
+    (contains the Windows user name) and the 'last modified by' Office account name.
+    """
+    import re
+    import shutil
+    import zipfile
+    path = Path(path)
+    with tempfile.TemporaryDirectory() as tmp:
+        out = Path(tmp) / path.name
+        with zipfile.ZipFile(path) as zin, zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as zout:
+            for item in zin.infolist():
+                data = zin.read(item.filename)
+                if item.filename == "xl/workbook.xml":
+                    data = re.sub(rb"<mc:AlternateContent[^>]*>\s*<mc:Choice[^>]*>\s*<x15ac:absPath[^>]*/>\s*"
+                                  rb"</mc:Choice>\s*</mc:AlternateContent>", b"", data)
+                    data = re.sub(rb"<x15ac:absPath[^>]*/>", b"", data)
+                elif item.filename == "docProps/core.xml":
+                    data = re.sub(rb"<cp:lastModifiedBy>[^<]*</cp:lastModifiedBy>",
+                                  b"<cp:lastModifiedBy>diligence-memo-tool</cp:lastModifiedBy>", data)
+                    data = re.sub(rb"<dc:creator>[^<]*</dc:creator>", b"<dc:creator>diligence-memo-tool</dc:creator>", data)
+                zout.writestr(item, data)
+        shutil.copy2(out, path)
+
+
 def evaluate(path, sets: dict, gets: list) -> dict:
     """
     sets: {'Assumptions!C5': 'Upside'}; gets: ['Assumptions!C40']. Returns {ref: {'text', 'value'}}.

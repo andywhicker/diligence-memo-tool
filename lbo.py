@@ -58,6 +58,7 @@ def main() -> None:
            f"$null=$ws.Range('{t['range']}').Table($ws.Range('{t['row_input']}'), $ws.Range('{t['col_input']}'))"
            for t in m.data_tables]
     result = excel_com.check(out, ops=ops)
+    excel_com.scrub(out)   # remove the save path and Office user name Excel writes into the file
     print(f"  {result['formulas']} formulas, {len(result['errors'])} showing errors")
     for e in result["errors"][:20]:
         print(f"    {e}")
