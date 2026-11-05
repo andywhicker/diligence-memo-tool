@@ -35,8 +35,12 @@ def main() -> None:
 
     if args.no_excel:
         return
-    print("Recalculating in Excel and checking every formula...")
-    result = excel_com.check(out)
+    print("Recalculating in Excel, adding the sensitivity grids, and checking every formula...")
+    # Excel "data tables" (What-If Analysis) can't be written by Python; ask Excel to create them.
+    ops = [f"$ws=$wb.Worksheets.Item('{t['sheet']}'); "
+           f"$null=$ws.Range('{t['range']}').Table($ws.Range('{t['row_input']}'), $ws.Range('{t['col_input']}'))"
+           for t in m.data_tables]
+    result = excel_com.check(out, ops=ops)
     print(f"  {result['formulas']} formulas, {len(result['errors'])} showing errors")
     for e in result["errors"][:20]:
         print(f"    {e}")

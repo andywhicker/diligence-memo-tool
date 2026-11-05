@@ -313,8 +313,9 @@ def build_assumptions(wb, data: dict, m: Model, n_years: int = 5):
     put(12, "ebitda_basis", "EBITDA basis for valuation and leverage (dropdown)", "Company adj. EBITDA", None,
         "Company figure as reported, or diligence-adjusted (bridge tab, step 3).")
     dropdown("C12", ["Company adj. EBITDA", "Diligence-adjusted EBITDA"])
-    put(13, "dilution", "Dilution from options / RSUs (% of basic shares)", 0.02, "pct",
-        "Placeholder: the filing gives basic shares only; check the equity footnote.")
+    put(13, "dilution", "Target's existing options / RSUs, cashed out at close (% of basic shares)", 0.02, "pct",
+        "Placeholder: the filing gives basic shares only; check the equity footnote. "
+        "(New management options are separate: see Sponsor equity structure.)")
     put(14, "txn_fees", "Transaction fees (% of enterprise value)", 0.02, "pct", "Placeholder: your call.")
     put(15, "fin_fees", "Financing fees (% of new debt)", 0.025, "pct", "Placeholder: your call.")
     put(16, "min_cash", "Minimum cash on balance sheet ($M)", 100.0, "money", "Placeholder: your call.")
@@ -343,8 +344,26 @@ def build_assumptions(wb, data: dict, m: Model, n_years: int = 5):
     dropdown("C31", m.proj_years[2:])
     put(32, "exit_multiple", "Exit EV / EBITDA", 18.0, "x", "Placeholder: your call. Often set at or below entry.")
 
+    # sponsor equity structure
+    section(ws, 34, "Sponsor equity structure", 3 + n_years)
+    put(35, "equity_structure", "Sponsor equity structure (dropdown)", "Strip: PIK preferred + common", None,
+        "Strip = sponsor funds its equity as PIK preferred plus common in fixed proportions; "
+        "All common = no preferred.", placeholder=False)
+    ws["C35"].fill = PatternFill("solid", fgColor=YELLOW)
+    dropdown("C35", ["Strip: PIK preferred + common", "All common"])
+    put(36, "pref_pct", "PIK preferred share of sponsor equity (if strip)", 0.98, "pct",
+        "Your structure: 98% preferred / 2% common.", placeholder=False)
+    ws["C36"].fill = PatternFill("solid", fgColor=YELLOW)
+    put(37, "common_pct", "Common share of sponsor equity (formula)",
+        '=IF($C$35="All common",1,1-$C$36)', "pct", "Formula: 1 - preferred share (100% if all common).",
+        placeholder=False, color=BLACK)
+    put(38, "pik_rate", "Preferred PIK dividend rate (compounds annually)", 0.12, "pct",
+        "Placeholder: your call. Accrues to the preferred; paid at exit ahead of common.")
+    put(39, "mgmt_pool", "Management option pool (% of common equity gain)", 0.10, "pct",
+        "Placeholder: your call. Options struck at the entry common value; they dilute the common only.")
+
     # operating case
-    row = 34
+    row = 41
     section(ws, row, "Operating case by scenario", 3 + n_years)
     header_row(ws, row + 1, ["Driver", "Scenario"] + m.proj_years + ["Basis"])
     rev = f"{H}!{L}{hr['revenue']}"
@@ -432,7 +451,8 @@ def build_guide(wb, data: dict, m: Model):
         ("Yellow fill: key assumption or placeholder to set", "fill"),
         ("", None),
         ("Status", None),
-        ("Tabs in this version: Guide, Historicals, Assumptions, Bridge, Sources & Uses, Model. Returns and Checks come next.", None),
+        ("Tabs in this version: Guide, Historicals, Assumptions, Bridge, Sources & Uses, Model, Returns. Checks come next.", None),
+        ("Sponsor equity: strip of PIK preferred and common (or all common); management options dilute the common only.", None),
         ("Model simplifications: interest on beginning-of-year balances (no circular reference); depreciation excludes "
          "acquired-intangible amortization (understates the tax shield); NOLs offset taxable income without annual limits.", None),
     ]
@@ -532,7 +552,8 @@ def build_sources_uses(wb, data: dict, m: Model):
     section(ws, 4, "Entry valuation", 4)
     line(5, "EBITDA used (Bridge)", f"={a['ltm_ebitda']}", color=GREEN, key="su_ebitda")
     line(6, "Current share price", f"={H}!{L}{hr['share_price']}", "price", GREEN)
-    line(7, "Offer price per share", f"=C6*(1+{a['premium']})", "price")
+    line(7, "Offer price per share", f"=C6*(1+{a['premium']}+{a['d_prem']})", "price",
+         note="Includes the Returns-tab sensitivity shift (0 unless a grid is calculating)")
     line(8, "Diluted shares (millions)", f"={H}!{L}{hr['shares_outstanding']}/1000000*(1+{a['dilution']})", "money",
          note="Basic shares x (1 + dilution assumption)")
     line(9, "Existing debt", f"={a['existing_debt']}", color=GREEN)
@@ -559,7 +580,7 @@ def build_sources_uses(wb, data: dict, m: Model):
 
     section(ws, 29, "Sources", 4)
     line(30, "Existing cash and short-term investments", "=-C10")
-    line(31, "Term loan B", f"={a['tlb_x']}*C5", key="tlb_amount")
+    line(31, "Term loan B", f"=({a['tlb_x']}+{a['d_tlb']})*C5", key="tlb_amount")
     line(32, "Senior notes", f"={a['notes_x']}*C5", key="notes_amount")
     line(33, "Revolver drawn at close", 0.0, color=BLUE, key="rcf_close")
     line(34, "Sponsor equity (plug)", "=C27-SUM(C30:C33)", bold=True, key="sponsor_equity")
@@ -647,7 +668,7 @@ def _projection_rows(sec, add, live, r, H, L, hr, a):
     add("rev", "Revenue", "money", f"={H}!{L}{hr['revenue']}", "={p}{n}*(1+" + live("growth") + ")", bold=True)
     add("growth", "  growth", "pct", None, "={c}{r[rev]}/{p}{r[rev]}-1", italic=True)
     add("ebitda_co", "EBITDA, company basis", "money", f"={a['company_ebitda']}",
-        "={c}{r[rev]}*" + live("margin"))
+        "={c}{r[rev]}*(" + live("margin") + f"+{a['d_margin']})")
     add("dil_adj", "Diligence adjustments (if selected)", "money", f"={a['ltm_ebitda']}-{a['company_ebitda']}",
         f'=IF({a["ebitda_basis"]}="Company adj. EBITDA",0,{{c}}{{r[rev]}}*{a["adj_pct_rev"]})')
     add("ebitda", "EBITDA (selected basis)", "money", "=B{r[ebitda_co]}+B{r[dil_adj]}",
@@ -711,14 +732,154 @@ def _projection_rows(sec, add, live, r, H, L, hr, a):
         '=IF($B{r[debt]}=0,"n/a",1-{c}{r[debt]}/$B{r[debt]})')
 
 
+# ---- Returns and sensitivities ------------------------------------------------------
+SHIFT_ROWS = {"d_prem": 6, "d_exit": 7, "d_tlb": 8, "d_margin": 9}
+
+
+def build_returns(wb, data: dict, m: Model):
+    ws = wb.create_sheet("Returns")
+    a, R = m.a, m.model_rows
+    title(ws, "Returns and sensitivities",
+          "Exit at the fiscal year end chosen on Assumptions. Single equity investment at close and single "
+          "distribution at exit (no dividends), so IRR = MOIC^(1/years) - 1.")
+
+    # sensitivity shifts (must stay 0; Excel data tables vary them)
+    section(ws, 4, "Sensitivity shifts: leave at 0 (the grids below vary these)", 8)
+    shifts = [("d_prem", "Entry premium shift (percentage points)", "pct"),
+              ("d_exit", "Exit multiple shift (turns)", "x"),
+              ("d_tlb", "Term loan leverage shift (turns of EBITDA)", "x"),
+              ("d_margin", "EBITDA margin shift, all years (percentage points)", "pct")]
+    for key, label, kind in shifts:
+        rr = SHIFT_ROWS[key]
+        ws.cell(row=rr, column=1, value=label).font = font(GRAY)
+        cell(ws, f"C{rr}", 0, kind, BLUE)
+    ws.cell(row=5, column=1, value="Keep these at 0. They exist only so the live grids can test other values.").font = \
+        font(GRAY, italic=True, size=8)
+
+    def line(row, label, f, kind="money", bold=False, color=BLACK, key=None, note=None):
+        ws.cell(row=row, column=1, value=label).font = font(bold=bold)
+        c = cell(ws, f"C{row}", f, kind, color, bold=bold)
+        if note:
+            ws.cell(row=row, column=4, value=note).font = font(GRAY, italic=True, size=8)
+        if key:
+            a[key] = f"Returns!$C${row}"
+        return c
+
+    proj = m.proj_years
+    first, last = m.proj_cols[proj[0]], m.proj_cols[proj[-1]]
+    rng = lambda key: f"Model!${first}${R[key]}:${last}${R[key]}"   # noqa: E731
+
+    section(ws, 11, "Exit", 8)
+    line(12, "Exit year", f"={a['exit_year']}", None, color=GREEN)
+    line(13, "Years held", f"=MATCH(C12&\"E\",Model!${first}$4:${last}$4,0)", "count")
+    line(14, "Exit-year EBITDA (selected basis)", f"=INDEX({rng('ebitda')},C13)")
+    line(15, "Exit EV / EBITDA", f"={a['exit_multiple']}+{a['d_exit']}", "x")
+    line(16, "Exit enterprise value", "=C14*C15", bold=True)
+    line(17, "Less: debt at exit", f"=-INDEX({rng('debt')},C13)")
+    line(18, "Plus: cash at exit", f"=INDEX({rng('cash_end')},C13)")
+    line(19, "Exit equity value", "=SUM(C16:C18)", bold=True)
+    ws["C19"].border = Border(top=THIN)
+
+    section(ws, 21, "Equity waterfall at exit", 8)
+    strip = f'{a["equity_structure"]}="All common"'
+    line(22, "Sponsor equity invested at close", f"={a['sponsor_equity']}", color=GREEN, key="sponsor_in")
+    line(23, "  of which PIK preferred", f"=IF({strip},0,C22*{a['pref_pct']})",
+         note="Per the equity structure on Assumptions")
+    line(24, "  of which common", "=C22-C23")
+    line(25, "Preferred accreted value at exit (invested x (1 + PIK)^years)", f"=C23*(1+{a['pik_rate']})^C13")
+    line(26, "Exit equity value", "=C19")
+    line(27, "To PIK preferred (paid first)", "=MIN(MAX(C26,0),C25)")
+    line(28, "Common equity value (after preferred)", "=MAX(C26,0)-C27")
+    line(29, "Less: management options", f"=-{a['mgmt_pool']}*MAX(0,C28-C24)",
+         note="Pool % of the gain on common above its entry value; comes out of the common only")
+    line(30, "To sponsor common", "=C28+C29")
+    line(31, "Total proceeds to sponsor", "=C27+C30", bold=True)
+    ws["C31"].border = Border(top=THIN)
+
+    section(ws, 33, "Returns", 8)
+    irr = lambda out, inv: (f'=IF({inv}<=0,"n/a",IF({out}<=0,-1,({out}/{inv})^(1/C13)-1))')   # noqa: E731
+    line(34, "Sponsor MOIC", '=IF(C22<=0,"n/a",C31/C22)', "x", bold=True, key="moic")
+    line(35, "Sponsor IRR", irr("C31", "C22"), "pct", bold=True, key="irr")
+    line(36, "PIK preferred MOIC / IRR", '=IF(C23<=0,"n/a",C27/C23)', "x")
+    cell(ws, "D36", irr("C27", "C23"), "pct")
+    line(37, "Common MOIC / IRR (sponsor's common, after management)", '=IF(C24<=0,"n/a",C30/C24)', "x")
+    cell(ws, "D37", irr("C30", "C24"), "pct")
+    line(38, "Management options value at exit", "=-C29")
+    for ref in ("C34", "C35"):
+        ws[ref].fill = PatternFill("solid", fgColor=BAND)
+
+    section(ws, 40, "Value creation (sources of the equity gain)", 8)
+    line(41, "Entry EV / EBITDA (implied)", f"={a['implied_multiple']}", "x", color=GREEN)
+    line(42, "EBITDA growth (at entry multiple)", f"=(C14-{a['su_ebitda']})*C41")
+    line(43, "Multiple expansion / (contraction)", "=(C15-C41)*C14")
+    line(44, "Net debt paydown", "=(Model!$B${0}-Model!$B${1})-(-C17-C18)".format(R["debt"], R["cash_end"]))
+    line(45, "Fees and other leakage", "=C46-SUM(C42:C44)", note="Transaction and financing fees, and the equity "
+                                                                 "cushion paid above entry EV.")
+    line(46, "Total equity gain / (loss), before management options", "=C26-C22", bold=True)
+    ws["C46"].border = Border(top=THIN)
+    line(47, "Less: management options", "=C29")
+    line(48, "Sponsor gain / (loss)", "=C31-C22", bold=True)
+
+    # sensitivity grids (filled in by Excel data tables after the file is built)
+    m.data_tables = []
+
+    def grid(top, heading, row_label, col_label, row_shift_key, col_shift_key, row_vals, col_vals,
+             row_kind, col_kind, row_base, col_base):
+        section(ws, top, heading, 8)
+        ws.cell(row=top + 1, column=1, value=f"Rows: {row_label}. Columns: {col_label}. "
+                                             f"Labels show the absolute value; the grid substitutes the shift.").font = \
+            font(GRAY, italic=True, size=8)
+        hdr, corner = top + 3, f"B{top + 3}"
+        # absolute-value labels (formulas) above the column headers and left of the row headers
+        for j, v in enumerate(col_vals):
+            col = get_column_letter(3 + j)
+            cell(ws, f"{col}{top + 2}", f"={col_base}+{col}{hdr}", col_kind, BLACK, bold=True)
+            cell(ws, f"{col}{hdr}", v, col_kind, BLUE, italic=True)
+        for i, v in enumerate(row_vals):
+            rr = hdr + 1 + i
+            cell(ws, f"A{rr}", f"={row_base}+B{rr}", row_kind, BLACK, bold=True)
+            ws[f"A{rr}"].alignment = Alignment(horizontal="right")
+            cell(ws, f"B{rr}", v, row_kind, BLUE, italic=True)
+        c = cell(ws, corner, f"={a['irr']}", "pct", GRAY, italic=True)
+        c.number_format = ';;;'   # hidden: Excel needs the output formula here
+        for i in range(len(row_vals)):
+            for j in range(len(col_vals)):
+                x = ws.cell(row=hdr + 1 + i, column=3 + j)
+                x.number_format = FMT["pct"]
+                x.font = font()
+                if i == len(row_vals) // 2 and j == len(col_vals) // 2:
+                    x.fill = PatternFill("solid", fgColor=YELLOW)
+        last_col = get_column_letter(2 + len(col_vals))
+        m.data_tables.append({"sheet": "Returns", "range": f"{corner}:{last_col}{hdr + len(row_vals)}",
+                              "row_input": f"C{SHIFT_ROWS[col_shift_key]}",
+                              "col_input": f"C{SHIFT_ROWS[row_shift_key]}"})
+
+    grid(51, "Sponsor IRR: entry premium (rows) x exit multiple (columns)", "offer premium to share price",
+         "exit EV / EBITDA", "d_prem", "d_exit", [-0.10, -0.05, 0, 0.05, 0.10], [-4, -2, 0, 2, 4],
+         "pct", "x", a["premium"], a["exit_multiple"])
+    grid(62, "Sponsor IRR: term loan leverage (rows) x EBITDA margin shift (columns)", "term loan B, turns of EBITDA",
+         "EBITDA margin change vs. the scenario, all years", "d_tlb", "d_margin", [-1, -0.5, 0, 0.5, 1],
+         [-0.02, -0.01, 0, 0.01, 0.02], "x", "pct", a["tlb_x"], "0")
+    ws.cell(row=63, column=1).value += " Column labels show the margin change itself."
+
+    ws.column_dimensions["A"].width = 58
+    ws.column_dimensions["B"].width = 10
+    for col in "CDEFG":
+        ws.column_dimensions[col].width = 12
+    return ws
+
+
 def build(data: dict, out_path) -> Model:
     wb = Workbook()
     m = Model()
+    # sensitivity shift cells live on the Returns tab; other tabs reference them by address
+    m.a.update({k: f"Returns!$C${r}" for k, r in SHIFT_ROWS.items()})
     build_guide(wb, data, m)
     build_historicals(wb, data, m)
     build_assumptions(wb, data, m)
     build_bridge(wb, data, m)
     build_sources_uses(wb, data, m)
     build_projection(wb, data, m)
+    build_returns(wb, data, m)
     wb.save(out_path)
     return m

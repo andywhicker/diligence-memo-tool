@@ -24,6 +24,8 @@ $xl.Visible = $false; $xl.DisplayAlerts = $false
 $out = @{ formulas = 0; errors = @(); values = @{} }
 try {
   $wb = $xl.Workbooks.Open($job.path)
+  # Files in OneDrive have AutoSave on by default; it would silently save test edits. Turn it off.
+  try { $wb.AutoSaveOn = $false } catch {}
   foreach ($s in $job.sets) {
     # Always pass text, as if typed into the cell: Excel's COM layer caches the first value's type
     # and rejects a number after a string in the same run.
@@ -74,9 +76,17 @@ def check(path, ops=None) -> dict:
 
 
 def evaluate(path, sets: dict, gets: list) -> dict:
-    """sets: {'Assumptions!C5': 'Upside'}; gets: ['Assumptions!C40']. Returns {ref: {'text', 'value'}}."""
-    job = {"path": str(Path(path).resolve()),
-           "sets": [{"sheet": s, "cell": c, "value": v} for s, c, v in ((*_split(k), v) for k, v in sets.items())],
-           "gets": [{"sheet": s, "cell": c} for s, c in (_split(g) for g in gets)],
-           "ops": [], "save": False}
-    return _run(job)
+    """
+    sets: {'Assumptions!C5': 'Upside'}; gets: ['Assumptions!C40']. Returns {ref: {'text', 'value'}}.
+    Works on a temporary copy outside OneDrive, so the original file can never be changed
+    (Excel AutoSave on OneDrive files would otherwise save the test inputs).
+    """
+    import shutil
+    with tempfile.TemporaryDirectory() as tmp:
+        copy = Path(tmp) / Path(path).name
+        shutil.copy2(path, copy)
+        job = {"path": str(copy),
+               "sets": [{"sheet": s, "cell": c, "value": v} for s, c, v in ((*_split(k), v) for k, v in sets.items())],
+               "gets": [{"sheet": s, "cell": c} for s, c in (_split(g) for g in gets)],
+               "ops": [], "save": False}
+        return _run(job)
