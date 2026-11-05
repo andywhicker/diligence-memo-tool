@@ -52,6 +52,9 @@ _EXEMPT = [
     re.compile(r"\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{1,2}(?:st|nd|rd|th)?\b", re.I),
     # period labels: "FY2026", "FY26", "Q3"
     re.compile(r"\b(?:fy|q)\s?\d{1,4}\b", re.I),
+    # descriptors, not figures: "top 10 customers", "Top-5", "(3)" item counts
+    re.compile(r"\btop[\s-]?\d{1,2}\b", re.I),
+    re.compile(r"\(\d\)"),
 ]
 
 

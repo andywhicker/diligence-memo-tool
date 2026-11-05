@@ -14,7 +14,7 @@ import json
 from src import llm
 from src.citations import _matches, _number_forms, _numbers_in
 from src.extract import load_prompt
-from src.synthesize import format_findings
+from src.synthesize import format_calcs, format_findings
 
 FLAGS = ["Inconsistent", "Needs explanation", "Consistent"]
 
@@ -57,23 +57,16 @@ def _cite(ids: list[str], by_id: dict) -> str:
     return f"({prefix}p{'p' if len(pages) > 1 else ''}. {', '.join(pages)})"
 
 
-def run(findings: list[dict], calcs: list[dict], cache_path=None, reuse: bool = False):
+def run(findings: list[dict], calcs: list[dict], cache_file=None):
     by_id = {f["id"]: f for f in findings + calcs}
-    if reuse and cache_path and cache_path.exists():
-        print("  [consistency check] reused saved model output")
-        items = json.loads(cache_path.read_text(encoding="utf-8"))["items"]
-    else:
-        narrative = [f for f in findings if f["category"] in NARRATIVE_CATEGORIES]
-        numbers = [f for f in findings if f["category"] in NUMBER_CATEGORIES and f["value"]]
-        calc_text = "\n".join(f"[{c['id']}] {c['claim']}" for c in calcs) or "(none)"
-        prompt = (load_prompt("consistency_check.md")
-                  .replace("{{NARRATIVE}}", format_findings(narrative))
-                  .replace("{{NUMBERS}}", format_findings(numbers))
-                  .replace("{{CALCS}}", calc_text))
-        raw = json.loads(llm.ask(prompt, label="consistency check", schema=SCHEMA, max_tokens=32000))
-        if cache_path:
-            cache_path.write_text(json.dumps(raw, indent=2), encoding="utf-8")
-        items = raw["items"]
+    narrative = [f for f in findings if f["category"] in NARRATIVE_CATEGORIES]
+    numbers = [f for f in findings if f["category"] in NUMBER_CATEGORIES and f["value"]]
+    prompt = (load_prompt("consistency_check.md")
+              .replace("{{NARRATIVE}}", format_findings(narrative))
+              .replace("{{NUMBERS}}", format_findings(numbers))
+              .replace("{{CALCS}}", format_calcs(calcs)))
+    items = json.loads(llm.ask(prompt, label="consistency check", schema=SCHEMA, max_tokens=32000,
+                               cache_file=cache_file))["items"]
 
     rows, dropped = [], []
     for it in items:

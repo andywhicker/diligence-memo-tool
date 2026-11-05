@@ -10,9 +10,12 @@ Every call goes through `ask()`, which:
 a cost summary at the end.
 """
 
+import hashlib
+import json
 import os
 import sys
 from dataclasses import dataclass, field
+from pathlib import Path
 
 import anthropic
 from dotenv import load_dotenv
@@ -84,13 +87,25 @@ def _get_client() -> anthropic.Anthropic:
 
 
 def ask(prompt: str, *, label: str, system: str | None = None, max_tokens: int = 32000,
-        schema: dict | None = None) -> str:
+        schema: dict | None = None, cache_file: Path | None = None) -> str:
     """
     Send one prompt, return the model's text answer, and log usage.
 
     If `schema` (a JSON Schema) is given, the API guarantees the answer is
     valid JSON matching that shape.
+
+    If `cache_file` is given, the answer is saved there with a fingerprint of
+    (model, effort, prompt, schema). The next identical call returns the saved
+    answer for free; change anything in the prompt or its inputs and it re-runs.
     """
+    key = hashlib.sha256(json.dumps([config.MODEL, config.EFFORT, system, prompt, schema],
+                                    sort_keys=True).encode()).hexdigest()
+    if cache_file and cache_file.exists():
+        saved = json.loads(cache_file.read_text(encoding="utf-8"))
+        if saved.get("key") == key:
+            print(f"  [{label}] reused saved answer (inputs unchanged, $0)")
+            return saved["text"]
+
     client = _get_client()
 
     output_config = {"effort": config.EFFORT}
@@ -123,4 +138,8 @@ def ask(prompt: str, *, label: str, system: str | None = None, max_tokens: int =
     if response.stop_reason == "max_tokens":
         raise RuntimeError(f"Answer for '{label}' was cut off at max_tokens={max_tokens}. Raise the limit.")
 
-    return "".join(b.text for b in response.content if b.type == "text")
+    text = "".join(b.text for b in response.content if b.type == "text")
+    if cache_file:
+        cache_file.parent.mkdir(parents=True, exist_ok=True)
+        cache_file.write_text(json.dumps({"key": key, "label": label, "text": text}), encoding="utf-8")
+    return text

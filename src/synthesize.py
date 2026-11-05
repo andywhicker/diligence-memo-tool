@@ -27,8 +27,13 @@ def _template_without_rules() -> str:
     return re.sub(r"<!--.*?-->", "", text, flags=re.S).strip()
 
 
-def write_draft(findings: list[dict]) -> str:
+def format_calcs(calcs: list[dict]) -> str:
+    return "\n".join(f"[{c['id']}] {c['claim']}" for c in calcs) or "(none)"
+
+
+def write_draft(findings: list[dict], calcs: list[dict], cache_file=None) -> str:
     prompt = (load_prompt("write_memo.md")
               .replace("{{TEMPLATE}}", _template_without_rules())
-              .replace("{{FINDINGS}}", format_findings(findings)))
-    return llm.ask(prompt, label="write memo", max_tokens=64000)
+              .replace("{{FINDINGS}}", format_findings(findings))
+              .replace("{{CALCS}}", format_calcs(calcs)))
+    return llm.ask(prompt, label="write memo", max_tokens=64000, cache_file=cache_file)

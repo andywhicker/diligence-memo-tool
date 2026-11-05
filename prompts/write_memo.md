@@ -4,10 +4,10 @@ Write the memo using ONLY these findings. Follow the template below exactly: sam
 
 ## Citation rules (enforced by code after you write; violations are deleted)
 
-1. **Cite every fact.** End every bullet, table row, and sentence that states a fact with the IDs of the findings that support it, in square brackets: `[F08-056]` or `[F08-056][F10-003]`. Code converts these to page numbers.
-2. **Only real IDs.** Use only IDs from the findings list. A line citing an ID that does not exist is deleted.
+1. **Cite every fact.** End every bullet, table row, and sentence that states a fact with the IDs of the findings that support it, each in its own square brackets: `[F08-056]` or `[F08-056][C-FCF-FY2026]`. Code converts these to page numbers.
+2. **Only real IDs.** Use only IDs from the findings and calculated-metrics lists. A line citing an ID that does not exist is deleted.
 3. **Numbers must come from the cited findings.** Every number you write must appear in one of the findings you cite on that line. You may convert units by rounding (e.g. a finding of "1,976,845" in "$ thousands" may be written "$1,976.8 million"), but nothing else.
-4. **Do not calculate.** No margins, growth rates, sums, differences, ratios, or CAGRs unless a finding states that number. Calculations are done separately in code. If you want to make a point that needs a calculation, make it in words without the number (e.g. "cost of sales grew faster than revenue [F08-016][F08-017]").
+4. **Do not calculate.** Never compute a number yourself. Code has already calculated the key PE metrics (organic growth, free cash flow and FCF conversion, add-backs, leverage, liquidity, working-capital days, backlog coverage, margins); they are listed below with IDs like [C-FCF-FY2026]. Use and cite those. If a point needs a calculation that is not on that list, make it in words without the number (e.g. "cost of sales grew faster than revenue [F08-016][F08-017]").
 5. **Sub-bullets.** Prefer citing each sub-bullet directly. A sub-bullet with no citation inherits its parent bullet's citations, so its numbers must appear in the parent's cited findings.
 6. **One claim per bullet.** Write bullets, not paragraphs. Keep each bullet to one or two sentences so each one can be checked on its own.
 7. **Missing information.** If the findings do not cover a required template item, write the item followed by "Not disclosed" (no citation needed) and add a matching question to Section 10.
@@ -15,6 +15,7 @@ Write the memo using ONLY these findings. Follow the template below exactly: sam
 
 ## Judgment (this is where you add value)
 
+- Use the calculated metrics where they sharpen the point: organic vs. reported growth, cash conversion vs. adjusted EBITDA, add-back intensity, leverage and liquidity. These are what a PE reader looks for first.
 - Prioritize. An IC reader has five minutes. Lead each section with what matters most for an investment decision.
 - Prefer company-specific facts over generic ones. Skip boilerplate risk factors.
 - When findings show a major transaction (e.g. a large acquisition) that makes periods non-comparable, say so wherever it affects interpretation (growth, margins, backlog, customer mix).
@@ -33,6 +34,10 @@ Do not include the HTML comment block (between `<!--` and `-->`) from the templa
 ## Template
 
 {{TEMPLATE}}
+
+## Calculated metrics (computed by code from the verified findings)
+
+{{CALCS}}
 
 ## Verified findings
 

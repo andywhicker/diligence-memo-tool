@@ -88,10 +88,9 @@ def main() -> None:
     parser.add_argument("--check", action="store_true", help="test the API connection and exit")
     parser.add_argument("--dry-run", action="store_true", help="read and chunk the PDF only; no API calls")
     parser.add_argument("--chunk", type=int, metavar="N", help="extract + verify chunk N only (for testing)")
-    parser.add_argument("--fresh", action="store_true", help="ignore saved chunk results and re-extract everything")
-    parser.add_argument("--reuse-draft", action="store_true",
-                        help="reuse the saved memo draft, financial table and consistency check model outputs "
-                             "(re-runs all code checks, no API cost)")
+    parser.add_argument("--fresh", action="store_true",
+                        help="ignore saved chunk results and re-extract everything (later steps re-run "
+                             "automatically whenever their inputs or prompts change)")
     args = parser.parse_args()
 
     if args.check:
@@ -106,10 +105,10 @@ def main() -> None:
     if args.chunk:
         run_one_chunk(args.pdf, args.chunk)
         return
-    full_run(args.pdf, fresh=args.fresh, reuse_draft=args.reuse_draft)
+    full_run(args.pdf, fresh=args.fresh)
 
 
-def full_run(pdf: str, fresh: bool, reuse_draft: bool = False) -> None:
+def full_run(pdf: str, fresh: bool) -> None:
     started = time.time()
     print(f"Model: {config.MODEL} | effort: {config.EFFORT}")
     m = run_map(pdf, fresh=fresh)
@@ -124,30 +123,28 @@ def full_run(pdf: str, fresh: bool, reuse_draft: bool = False) -> None:
         print("Rejection reasons: " + ", ".join(f"{k}: {v}" for k, v in reasons.most_common()))
     print(f"Saved: {m.out_dir / 'findings.json'} and rejected.json")
 
-    # ---- Step 5: write the memo from verified findings, then enforce citations ----
-    draft_path = m.out_dir / "draft_raw.md"
-    if reuse_draft and draft_path.exists():
-        print("\nReusing saved draft (no API call).")
-        draft = draft_path.read_text(encoding="utf-8")
-    else:
-        print("\nWriting memo from verified findings...")
-        draft = write_draft(m.findings)
-        draft_path.write_text(draft, encoding="utf-8")
+    cache = m.out_dir / "cache"   # model answers, reused automatically when their inputs are unchanged
 
-    memo, report = enforce(draft, m.findings)
+    # ---- Financial tables + PE metrics: model picks inputs, code checks and calculates ----
+    print("\nBuilding financial tables and metrics...")
+    table = fintable.build(m.findings, cache_file=cache / "financial_table.json")
+    (m.out_dir / "calcs.json").write_text(json.dumps(table.calcs, indent=2), encoding="utf-8")
+    sources = m.findings + table.calcs        # everything the memo may cite
 
-    # ---- Step 6: financial table (model picks cells, code computes/checks) + consistency check ----
-    print("\nBuilding financial table...")
-    table = fintable.build(m.findings, cache_path=m.out_dir / "table_raw.json", reuse=reuse_draft)
-    table_md, table_checks = fintable.render(table)
-    notes_md, notes_report = enforce("\n".join(f"- {n}" for n in table.notes), m.findings)
+    # ---- Memo: written from verified findings + calcs, then every line citation-checked ----
+    print("Writing memo...")
+    draft = write_draft(m.findings, table.calcs, cache_file=cache / "memo_draft.json")
+    (m.out_dir / "draft_raw.md").write_text(draft, encoding="utf-8")
+    memo, report = enforce(draft, sources)
+
+    notes_md, notes_report = enforce("\n".join(f"- {n}" for n in table.notes), sources)
     report.deleted += [(l, f"[table note] {r}") for l, r in notes_report.deleted]
-    fin_block = "\n".join([table_md, "", "**Table notes**", "", *[f"- {c}" for c in table_checks],
+    fin_block = "\n".join([fintable.render(table), "**Table notes**", "",
+                           *[f"- {c}" for c in fintable.checks(table)],
                            *([notes_md] if notes_md.strip() else []), "", "**Commentary**"])
 
     print("Running consistency check...")
-    consistency_md, dropped = consistency.run(m.findings, table.calcs,
-                                              cache_path=m.out_dir / "consistency_raw.json", reuse=reuse_draft)
+    consistency_md, dropped = consistency.run(m.findings, table.calcs, cache_file=cache / "consistency.json")
     report.deleted += [(l, f"[consistency item] {r}") for l, r in dropped]
 
     pages = m.page_map.pages

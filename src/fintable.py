@@ -1,16 +1,21 @@
 """
-Financial summary table.
+Financial tables and PE metrics.
 
 Division of labor:
-  - The MODEL only chooses which verified finding goes in each cell (judgment).
-  - CODE converts units to $ millions, computes growth/margins/ratios (labeled
-    "calc."), and cross-checks each cell against the same figure on other pages.
+  - The MODEL only points to inputs: for each slot and year, a finding ID and the
+    exact number inside that finding (a finding can hold several numbers).
+  - CODE checks the number is in the finding's quote, converts units to
+    $ millions, computes every metric (labeled "calc." with its formula), and
+    cross-checks each input against the same figure on other pages.
 
-Cross-check: a 10-K reports most headline figures more than once (MD&A, the
-financial statements, the segment note). Those were extracted independently,
-from different chunks. If a cell's value also appears on another page with the
-same fiscal year, the cell is "corroborated". This is how we catch the model
-picking the wrong column or the wrong unit.
+Every calculated metric is also exported as a "calc finding" with an ID like
+C-FCF-FY2026, so the memo writer and the consistency check can cite it.
+
+Outputs four tables for Section 5:
+  A. Financial summary (template rows)
+  B. Cash conversion & earnings quality
+  C. Balance sheet & liquidity
+  D. Operating metrics
 """
 
 import json
@@ -20,53 +25,117 @@ from dataclasses import dataclass, field
 from src import llm
 from src.extract import load_prompt
 from src.synthesize import format_findings
+from src.verify import normalize
 
-ROWS = ["revenue", "gross_profit", "operating_income", "ebitda_reported", "adjusted_ebitda",
-        "d_and_a", "capex", "backlog_total", "largest_customer_pct"]
-
-LABELS = {
-    "revenue": "Revenue", "revenue_growth": "Revenue growth % (calc.)",
-    "gross_profit": "Gross profit", "gross_margin": "Gross margin % (calc.)",
-    "operating_income": "Operating income (loss)",
-    "ebitda_reported": "EBITDA (as reported by company)",
-    "adjusted_ebitda": "Adjusted EBITDA (as reported by company)",
-    "d_and_a": "D&A", "capex": "Capex", "capex_pct": "Capex % of revenue (calc.)",
-    "backlog_total": "Backlog (total)", "largest_customer_pct": "Largest customer % of revenue",
+# slot -> (label, kind). kind: money ($M), pct, count
+SLOTS = {
+    "revenue": ("Revenue", "money"),
+    "gross_profit": ("Gross profit", "money"),
+    "operating_income": ("Operating income (loss)", "money"),
+    "ebitda_reported": ("EBITDA (as reported by company)", "money"),
+    "adjusted_ebitda": ("Adjusted EBITDA (as reported by company)", "money"),
+    "d_and_a": ("D&A", "money"),
+    "depreciation": ("Depreciation (excl. amortization)", "money"),
+    "goodwill_impairment": ("of which: goodwill impairment", "money"),
+    "capex": ("Capex", "money"),
+    "operating_cash_flow": ("Operating cash flow", "money"),
+    "acquired_revenue": ("Revenue from businesses acquired in year", "money"),
+    "cost_of_sales": ("Cost of sales", "money"),
+    "ffp_revenue": ("Fixed-price revenue", "money"),
+    "cost_plus_revenue": ("Cost-plus revenue", "money"),
+    "tm_revenue": ("T&M revenue", "money"),
+    "largest_customer_pct": ("Largest customer % of revenue", "pct"),
+    "total_debt": ("Total debt (principal)", "money"),
+    "cash": ("Cash and equivalents", "money"),
+    "short_term_investments": ("Short-term investments", "money"),
+    "revolver_available": ("Undrawn revolver availability", "money"),
+    "accounts_receivable": ("Accounts receivable", "money"),
+    "unbilled_receivables": ("Unbilled receivables", "money"),
+    "inventory": ("Inventories", "money"),
+    "funded_backlog": ("Funded backlog", "money"),
+    "unfunded_backlog": ("Unfunded backlog", "money"),
+    "backlog_total": ("Backlog (total)", "money"),
+    "employees": ("Employees", "count"),
 }
-ORDER = ["revenue", "revenue_growth", "gross_profit", "gross_margin", "operating_income",
-         "ebitda_reported", "adjusted_ebitda", "d_and_a", "capex", "capex_pct",
-         "backlog_total", "largest_customer_pct"]
+SUMMABLE = {"acquired_revenue"}
+POSITIVE = {"capex", "d_and_a", "depreciation", "goodwill_impairment", "total_debt"}
 
+# calculated rows -> (label, kind). kind: pct, money, x (multiple), days, musd ($M per head)
+CALC_ROWS = {
+    "revenue_growth": ("Revenue growth % (calc.)", "pct"),
+    "gross_margin": ("Gross margin % (calc.)", "pct"),
+    "capex_pct": ("Capex % of revenue (calc.)", "pct"),
+    "op_margin": ("Operating margin % (calc.)", "pct"),
+    "adj_ebitda_margin": ("Adj. EBITDA margin % (calc.)", "pct"),
+    "organic_growth": ("Organic revenue growth % (calc.)", "pct"),
+    "fcf": ("Free cash flow (OCF - capex) (calc.)", "money"),
+    "fcf_conversion": ("FCF / Adj. EBITDA (calc.)", "pct"),
+    "gaap_ebitda": ("GAAP EBITDA (op. income + D&A) (calc.)", "money"),
+    "addbacks": ("Add-backs to reach Adj. EBITDA (calc.)", "money"),
+    "other_addbacks_pct": ("Add-backs excl. impairment, % of Adj. EBITDA (calc.)", "pct"),
+    "dso": ("DSO incl. unbilled, days (calc.)", "days"),
+    "dio": ("DIO, days (calc.)", "days"),
+    "cash_and_sti": ("Cash + short-term investments (calc.)", "money"),
+    "net_debt": ("Net debt (calc.)", "money"),
+    "gross_leverage": ("Total debt / Adj. EBITDA (calc.)", "x"),
+    "net_leverage": ("Net debt / Adj. EBITDA (calc.)", "x"),
+    "liquidity": ("Liquidity incl. undrawn revolver (calc.)", "money"),
+    "funded_coverage": ("Funded backlog / revenue (calc.)", "x"),
+    "total_backlog_coverage": ("Total backlog / revenue (calc.)", "x"),
+    "capex_to_dep": ("Capex / depreciation (calc.)", "x"),
+    "revenue_per_fte": ("Revenue per employee, $M (calc.)", "musd"),
+    "ffp_pct": ("Fixed-price % of revenue (calc.)", "pct"),
+    "cost_plus_pct": ("Cost-plus % of revenue (calc.)", "pct"),
+    "tm_pct": ("T&M % of revenue (calc.)", "pct"),
+}
+
+TABLES = [
+    ("Financial summary", ["revenue", "revenue_growth", "gross_profit", "gross_margin", "operating_income",
+                           "ebitda_reported", "adjusted_ebitda", "d_and_a", "capex", "capex_pct",
+                           "backlog_total", "largest_customer_pct"], True),
+    ("Cash conversion & earnings quality", ["organic_growth", "operating_cash_flow", "fcf", "fcf_conversion",
+                                            "gaap_ebitda", "addbacks", "goodwill_impairment",
+                                            "other_addbacks_pct", "dso", "dio"], False),
+    ("Balance sheet & liquidity (fiscal year end)", ["total_debt", "cash_and_sti", "net_debt", "gross_leverage",
+                                                     "net_leverage", "liquidity"], False),
+    ("Operating metrics", ["funded_coverage", "total_backlog_coverage", "capex_to_dep", "revenue_per_fte",
+                           "ffp_pct", "cost_plus_pct", "tm_pct", "SEGMENTS"], False),
+]
+
+_PICK = {"type": "object", "properties": {"finding_id": {"type": "string"}, "number": {"type": "string"}},
+         "required": ["finding_id", "number"], "additionalProperties": False}
 SCHEMA = {
     "type": "object",
     "properties": {
         "years": {"type": "array", "items": {"type": "string"}},
         "cells": {"type": "array", "items": {
             "type": "object",
-            "properties": {
-                "row": {"type": "string", "enum": ROWS},
-                "year": {"type": "string"},
-                "finding_id": {"type": "string"},
-            },
-            "required": ["row", "year", "finding_id"],
-            "additionalProperties": False,
-        }},
+            "properties": {"slot": {"type": "string", "enum": list(SLOTS)},
+                           "year": {"type": "string"},
+                           "picks": {"type": "array", "items": _PICK}},
+            "required": ["slot", "year", "picks"], "additionalProperties": False}},
+        "segments": {"type": "array", "items": {
+            "type": "object",
+            "properties": {"name": {"type": "string"}, "profit_label": {"type": "string"},
+                           "year": {"type": "string"}, "revenue": _PICK, "profit": _PICK},
+            "required": ["name", "profit_label", "year", "revenue", "profit"], "additionalProperties": False}},
         "notes": {"type": "array", "items": {"type": "string"}},
     },
-    "required": ["years", "cells", "notes"],
+    "required": ["years", "cells", "segments", "notes"],
     "additionalProperties": False,
 }
 
-NUMERIC_CATEGORIES = {"financial", "balance_sheet", "backlog", "customers"}
+NUMERIC_CATEGORIES = {"financial", "balance_sheet", "backlog", "customers", "business"}
 
 
 @dataclass
 class Cell:
-    value: float | None = None       # $ millions, or % for percentage rows
-    is_pct: bool = False
-    pages: list = field(default_factory=list)
-    finding_id: str = ""
+    value: float
+    kind: str
+    pages: list
+    ids: list = field(default_factory=list)
     calc: bool = False
+    formula: str = ""
     corroborated_on: list = field(default_factory=list)
     warning: str = ""
 
@@ -74,160 +143,327 @@ class Cell:
 @dataclass
 class FinTable:
     years: list
-    cells: dict                      # (row, year) -> Cell
-    notes: list                      # raw notes with [F..] IDs (citation-checked later)
-    calcs: list                      # pseudo-findings for calculated metrics (used by consistency check)
-    problems: list                   # cells the code rejected, with reasons
+    cells: dict          # (row, year) -> Cell
+    labels: dict         # row -> label (includes segment rows)
+    notes: list          # model notes with [F..] IDs (citation-checked by caller)
+    calcs: list          # calc findings for the memo writer and consistency check
+    problems: list       # rejected picks, with reasons
+    assumptions: list    # code-generated method notes
 
 
-def parse_value(value: str, unit: str) -> tuple[float | None, bool]:
-    """'(311,026)' + '$ thousands' -> (-311.026, False). '85%' -> (85.0, True)."""
-    m = re.search(r"\d[\d,]*(?:\.\d+)?", value or "")
+# ---- parsing and checks ---------------------------------------------------------
+def _parse(number: str, unit: str, kind: str):
+    m = re.search(r"\d[\d,]*(?:\.\d+)?", number or "")
     if not m:
-        return None, False
+        return None, None
     x = float(m.group(0).replace(",", ""))
-    if "(" in value or value.strip().startswith("-"):
+    if "(" in number or number.strip().lstrip("$").startswith("-"):
         x = -x
-    u = (unit or "").lower()
-    if "%" in u or "%" in value or "percent" in u:
-        return x, True
+    if kind == "count":
+        return x, "count"
+    u, n = (unit or "").lower(), number.lower()
+    if "%" in number or ("%" in u and "$" not in u) or "percent" in u:
+        return x, "pct"
+    if "billion" in n:
+        return x * 1_000, "money"
+    if "million" in n:
+        return x, "money"
     if "thousand" in u:
-        return x / 1_000, False
+        return x / 1_000, "money"
     if "billion" in u:
-        return x * 1_000, False
+        return x * 1_000, "money"
     if "million" in u:
-        return x, False
+        return x, "money"
     if u.strip() in ("$", "usd", "dollars"):
-        return x / 1_000_000, False
-    return None, False                       # unknown unit: refuse to guess
+        return x / 1_000_000, "money"
+    return None, None
 
 
-def _year_digits(label: str) -> str:
+def _in_finding(number: str, f: dict) -> bool:
+    bare = re.sub(r"[^\d.]", "", number or "").strip(".")
+    if not bare:
+        return False
+    quote_digits = normalize(f["quote"]).replace(",", "")
+    value_bare = re.sub(r"[^\d.]", "", f["value"] or "").strip(".")
+    return bare in quote_digits or bare == value_bare
+
+
+def _year(label: str) -> str:
     m = re.search(r"(19|20)\d\d", label)
     return m.group(0) if m else label
 
 
-def build(findings: list[dict], cache_path=None, reuse: bool = False) -> FinTable:
+def _slug(s: str) -> str:
+    return re.sub(r"[^A-Z0-9]+", "_", s.upper()).strip("_")
+
+
+def _sorted_pages(pages):
+    return sorted(set(pages), key=lambda p: (not p.isdigit(), int(p) if p.isdigit() else 0, p))
+
+
+def fmt(value: float, kind: str) -> str:
+    if kind == "pct":
+        return f"{value:.1f}%"
+    if kind == "x":
+        return f"{value:.2f}x"
+    if kind == "days":
+        return f"{value:.0f}"
+    if kind == "musd":
+        return f"${value:.2f}"
+    if kind == "count":
+        return f"{value:,.0f}"
+    return f"({abs(value):,.1f})" if value < 0 else f"{value:,.1f}"
+
+
+# ---- build ------------------------------------------------------------------
+def build(findings: list[dict], cache_file=None) -> FinTable:
     by_id = {f["id"]: f for f in findings}
-    if reuse and cache_path and cache_path.exists():
-        print("  [financial table] reused saved model output")
-        raw = json.loads(cache_path.read_text(encoding="utf-8"))
-    else:
-        numeric = [f for f in findings if f["category"] in NUMERIC_CATEGORIES and f["value"]]
-        prompt = load_prompt("financial_table.md").replace("{{FINDINGS}}", format_findings(numeric))
-        raw = json.loads(llm.ask(prompt, label="financial table", schema=SCHEMA, max_tokens=32000))
-        if cache_path:
-            cache_path.write_text(json.dumps(raw, indent=2), encoding="utf-8")
+    numeric = [f for f in findings if f["category"] in NUMERIC_CATEGORIES and f["value"]]
+    prompt = load_prompt("financial_table.md").replace("{{FINDINGS}}", format_findings(numeric))
+    raw = json.loads(llm.ask(prompt, label="financial table", schema=SCHEMA, max_tokens=48000,
+                             cache_file=cache_file))
 
     years = raw["years"][-3:]
-    cells, problems = {}, []
+    cells, problems, labels = {}, [], {k: v[0] for k, v in {**SLOTS, **CALC_ROWS}.items()}
+
+    def take(picks, row, year, kind, summable=False):
+        if not picks:
+            return None
+        if len(picks) > 1 and not summable:
+            problems.append(f"{labels[row]} {year}: model gave {len(picks)} picks for a single-value slot; used the first")
+            picks = picks[:1]
+        total, pages, ids, warn = 0.0, [], [], ""
+        for p in picks:
+            f = by_id.get(p["finding_id"])
+            if f is None:
+                problems.append(f"{labels[row]} {year}: nonexistent finding {p['finding_id']}; left blank")
+                return None
+            if not _in_finding(p["number"], f):
+                problems.append(f"{labels[row]} {year}: '{p['number']}' is not in finding {f['id']}; left blank")
+                return None
+            v, k = _parse(p["number"], f["unit"], kind)
+            if v is None or k != kind:
+                problems.append(f"{labels[row]} {year}: could not read '{p['number']}' (unit '{f['unit']}') "
+                                f"as {kind} from {f['id']}; left blank")
+                return None
+            if row in POSITIVE:
+                v = abs(v)
+            total += v
+            pages.append(f["page"])
+            ids.append(f["id"])
+            if _year(year) not in f["period"] and _year(year) not in f["claim"]:
+                warn = f"{f['id']} is dated '{f['period']}', not {year}"
+        cell = Cell(total, kind, _sorted_pages(pages), ids, warning=warn)
+        if len(picks) == 1:
+            _corroborate(cell, row, year, findings)
+        return cell
+
     for c in raw["cells"]:
-        if c["year"] not in years or not c["finding_id"]:
+        if c["year"] in years:
+            cell = take(c["picks"], c["slot"], c["year"], SLOTS[c["slot"]][1], c["slot"] in SUMMABLE)
+            if cell:
+                cells[(c["slot"], c["year"])] = cell
+
+    segments = []
+    for s in raw["segments"]:
+        if s["year"] not in years:
             continue
-        f = by_id.get(c["finding_id"])
-        if f is None:
-            problems.append(f"{LABELS[c['row']]} {c['year']}: model chose nonexistent finding {c['finding_id']}")
+        name = s["name"].strip()
+        rk, pk = f"seg_rev:{name}", f"seg_profit:{name}"
+        labels[rk], labels[pk] = f"{name} revenue", f"{name} {s['profit_label']}"
+        labels[f"seg_margin:{name}"] = f"{name} {s['profit_label']} margin % (calc.)"
+        for key, pick in ((rk, s["revenue"]), (pk, s["profit"])):
+            if pick["finding_id"]:
+                cell = take([pick], key, s["year"], "money")
+                if cell:
+                    cells[(key, s["year"])] = cell
+        if name not in segments:
+            segments.append(name)
+
+    calcs, assumptions = _calculate(cells, years, segments, labels)
+    return FinTable(years, cells, labels, raw["notes"], calcs, problems, assumptions)
+
+
+def _corroborate(cell: Cell, row: str, year: str, findings: list[dict]):
+    """Same value, same year, on a different page = independent confirmation."""
+    for g in findings:
+        if g["id"] in cell.ids or g["page"] in cell.pages or not g["value"]:
             continue
-        value, is_pct = parse_value(f["value"], f["unit"])
-        if value is None:
-            problems.append(f"{LABELS[c['row']]} {c['year']}: could not read unit '{f['unit']}' "
-                            f"for value '{f['value']}' ({f['id']}); left blank")
+        gv, gk = _parse(g["value"], g["unit"], cell.kind)
+        if gv is None or gk != cell.kind:
             continue
-        if c["row"] in ("capex", "d_and_a"):
-            value = abs(value)            # cash flow statements show outflows in parentheses
-        cell = Cell(value=value, is_pct=is_pct, pages=[f["page"]], finding_id=f["id"])
-        # The chosen finding's own period must mention the column's year.
-        if _year_digits(c["year"]) not in f["period"]:
-            cell.warning = f"period of {f['id']} is '{f['period']}', not {c['year']}"
-        # Cross-check: same value, same year, on a different page.
-        for g in findings:
-            if g["id"] == f["id"] or g["page"] == f["page"] or not g["value"]:
-                continue
-            gv, gpct = parse_value(g["value"], g["unit"])
-            if gv is None or gpct != is_pct:
-                continue
-            if c["row"] in ("capex", "d_and_a"):
-                gv = abs(gv)
-            if abs(gv - value) <= max(0.051, abs(value) * 0.0005) and _year_digits(c["year"]) in g["period"]:
-                if g["page"] not in cell.corroborated_on:
-                    cell.corroborated_on.append(g["page"])
-        cells[(c["row"], c["year"])] = cell
-
-    calcs = _add_calcs(cells, years)
-    return FinTable(years, cells, raw["notes"], calcs, problems)
+        if row in POSITIVE:
+            gv = abs(gv)
+        if abs(gv - cell.value) <= max(0.051, abs(cell.value) * 0.0005) and _year(year) in g["period"]:
+            if g["page"] not in cell.corroborated_on:
+                cell.corroborated_on.append(g["page"])
 
 
-def _ratio(cells, num_row, den_row, year):
-    a, b = cells.get((num_row, year)), cells.get((den_row, year))
-    if a and b and a.value is not None and b.value not in (None, 0):
-        return a.value / b.value * 100, sorted(set(a.pages + b.pages), key=lambda p: (len(p), p))
-    return None, None
+# ---- metrics -----------------------------------------------------------------
+def _calculate(cells, years, segments, labels):
+    calcs, assumptions = [], set()
 
+    def get(row, y):
+        c = cells.get((row, y))
+        return c if c is not None else None
 
-def _add_calcs(cells, years) -> list[dict]:
-    calcs = []
+    def put(row, y, value, inputs, formula, kind=None):
+        kind = kind or CALC_ROWS[row][1]
+        pages = _sorted_pages([p for c in inputs for p in c.pages])
+        cells[(row, y)] = Cell(value, kind, pages, calc=True, formula=formula)
+        calcs.append({
+            "id": f"C-{_slug(row)}-{_slug(y)}", "category": "calc", "page": "calc", "pages": pages,
+            "metric": labels[row], "value": fmt(value, kind).strip("$x%()").replace(",", ""),
+            "unit": {"pct": "%", "money": "$ millions", "x": "x", "days": "days", "musd": "$ millions"}[kind],
+            "period": y, "quote": "",
+            "claim": f"{labels[row]} for {y} = {fmt(value, kind)}; formula: {formula}",
+        })
 
-    def put(row, year, value, pages, desc):
-        cells[(row, year)] = Cell(value=value, is_pct=True, pages=pages, calc=True)
-        calcs.append({"id": f"C-{row.upper()}-{year}", "category": "calc", "page": "calc",
-                      "pages": pages, "metric": LABELS[row], "value": f"{value:.1f}", "unit": "%",
-                      "period": year, "claim": f"{LABELS[row]} for {year} = {value:.1f}% ({desc})"})
+    def m(c):   # money text for formulas
+        return fmt(c.value, "money")
 
     for i, y in enumerate(years):
-        v, p = _ratio(cells, "gross_profit", "revenue", y)
-        if v is not None:
-            put("gross_margin", y, v, p, "gross profit / revenue")
-        v, p = _ratio(cells, "capex", "revenue", y)
-        if v is not None:
-            put("capex_pct", y, v, p, "capex / revenue")
-        for row in ("operating_income", "adjusted_ebitda"):
-            v, p = _ratio(cells, row, "revenue", y)
-            if v is not None:
-                # margin calcs available to the consistency check, not shown as table rows
-                calcs.append({"id": f"C-{row.upper()}_MARGIN-{y}", "category": "calc", "page": "calc",
-                              "pages": p, "metric": f"{LABELS[row]} margin (calc.)", "value": f"{v:.1f}",
-                              "unit": "%", "period": y,
-                              "claim": f"{LABELS[row]} as % of revenue for {y} = {v:.1f}%"})
-        if i > 0:
-            cur, prev = cells.get(("revenue", y)), cells.get(("revenue", years[i - 1]))
-            if cur and prev and prev.value:
-                g = (cur.value / prev.value - 1) * 100
-                put("revenue_growth", y, g, sorted(set(cur.pages + prev.pages)), f"vs. {years[i - 1]}")
-    return calcs
+        prev = years[i - 1] if i > 0 else None
+        rev, gp, op = get("revenue", y), get("gross_profit", y), get("operating_income", y)
+        adj, da, dep = get("adjusted_ebitda", y), get("d_and_a", y), get("depreciation", y)
+        capex, ocf, imp = get("capex", y), get("operating_cash_flow", y), get("goodwill_impairment", y)
+        acq, cogs = get("acquired_revenue", y), get("cost_of_sales", y)
+        debt, cash, sti, rcf = get("total_debt", y), get("cash", y), get("short_term_investments", y), get("revolver_available", y)
+        ar, unb, inv = get("accounts_receivable", y), get("unbilled_receivables", y), get("inventory", y)
+        fb, ub, bt, emp = get("funded_backlog", y), get("unfunded_backlog", y), get("backlog_total", y), get("employees", y)
+        rev_prev = get("revenue", prev) if prev else None
+
+        if rev and rev_prev and rev_prev.value:
+            put("revenue_growth", y, (rev.value / rev_prev.value - 1) * 100, [rev, rev_prev],
+                f"{m(rev)} / {m(rev_prev)} - 1")
+        if rev and rev.value:
+            for row, c, name in (("gross_margin", gp, "gross profit"), ("capex_pct", capex, "capex"),
+                                 ("op_margin", op, "operating income"), ("adj_ebitda_margin", adj, "Adj. EBITDA"),
+                                 ("ffp_pct", get("ffp_revenue", y), "fixed-price revenue"),
+                                 ("cost_plus_pct", get("cost_plus_revenue", y), "cost-plus revenue"),
+                                 ("tm_pct", get("tm_revenue", y), "T&M revenue")):
+                if c:
+                    put(row, y, c.value / rev.value * 100, [c, rev], f"{name} {m(c)} / revenue {m(rev)}")
+        if rev and acq and rev_prev and rev_prev.value:
+            organic = rev.value - acq.value
+            put("organic_growth", y, (organic / rev_prev.value - 1) * 100, [rev, acq, rev_prev],
+                f"(revenue {m(rev)} - acquired revenue {m(acq)}) / prior-year revenue {m(rev_prev)} - 1")
+            assumptions.add("Organic growth removes revenue contributed in the year by businesses acquired in that "
+                            "year, as the company discloses it; it does not adjust the prior year.")
+        if ocf and capex:
+            fcf = ocf.value - capex.value
+            put("fcf", y, fcf, [ocf, capex], f"OCF {m(ocf)} - capex {m(capex)}")
+            if adj and adj.value > 0:
+                put("fcf_conversion", y, fcf / adj.value * 100, [ocf, capex, adj],
+                    f"FCF {fmt(fcf, 'money')} / Adj. EBITDA {m(adj)}")
+        if op and da:
+            gaap = op.value + da.value
+            put("gaap_ebitda", y, gaap, [op, da], f"operating income {m(op)} + D&A {m(da)}")
+            if adj:
+                addbacks = adj.value - gaap
+                put("addbacks", y, addbacks, [adj, op, da],
+                    f"Adj. EBITDA {m(adj)} - GAAP EBITDA {fmt(gaap, 'money')}")
+                if imp and adj.value > 0:
+                    put("other_addbacks_pct", y, (addbacks - imp.value) / adj.value * 100, [adj, op, da, imp],
+                        f"(add-backs {fmt(addbacks, 'money')} - goodwill impairment {m(imp)}) / Adj. EBITDA {m(adj)}")
+                assumptions.add("Add-backs = company Adjusted EBITDA minus GAAP EBITDA (operating income + D&A). If "
+                                "the company's measure is segment-level, add-backs also include costs outside "
+                                "segment results (e.g. unallocated corporate).")
+        if rev and rev.value and ar:
+            recv = ar.value + (unb.value if unb else 0)
+            put("dso", y, recv / rev.value * 365, [ar, rev] + ([unb] if unb else []),
+                f"(AR {m(ar)}" + (f" + unbilled {m(unb)}" if unb else "") + f") / revenue {m(rev)} x 365")
+            if not unb:
+                assumptions.add(f"DSO for {y} excludes unbilled receivables (not found).")
+            assumptions.add("Working-capital days use fiscal-year-end balances, not averages; balances acquired "
+                            "mid-year inflate days relative to a full-year average.")
+        if inv and cogs and cogs.value:
+            put("dio", y, inv.value / cogs.value * 365, [inv, cogs], f"inventory {m(inv)} / cost of sales {m(cogs)} x 365")
+        if cash:
+            liquid = cash.value + (sti.value if sti else 0)
+            liq_inputs = [cash] + ([sti] if sti else [])
+            put("cash_and_sti", y, liquid, liq_inputs,
+                f"cash {m(cash)}" + (f" + short-term investments {m(sti)}" if sti else ""))
+            assumptions.add("Net debt treats short-term investments as cash." if sti else
+                            f"No short-term investments found for {y}; net debt uses cash only.")
+            if debt:
+                nd = debt.value - liquid
+                put("net_debt", y, nd, [debt] + liq_inputs, f"debt {m(debt)} - cash and investments {fmt(liquid, 'money')}")
+                assumptions.add("Total debt is principal as disclosed (excludes leases; convertible notes at principal).")
+                if adj and adj.value > 0:
+                    put("gross_leverage", y, debt.value / adj.value, [debt, adj], f"debt {m(debt)} / Adj. EBITDA {m(adj)}")
+                    put("net_leverage", y, nd / adj.value, [debt, adj] + liq_inputs,
+                        f"net debt {fmt(nd, 'money')} / Adj. EBITDA {m(adj)}")
+            if rcf:
+                put("liquidity", y, liquid + rcf.value, liq_inputs + [rcf],
+                    f"cash and investments {fmt(liquid, 'money')} + undrawn revolver {m(rcf)}")
+        if rev and rev.value:
+            if fb:
+                put("funded_coverage", y, fb.value / rev.value, [fb, rev], f"funded backlog {m(fb)} / revenue {m(rev)}")
+            total_bl = bt.value if bt else (fb.value + ub.value if fb and ub else None)
+            if total_bl is not None:
+                ins = [bt] if bt else [fb, ub]
+                put("total_backlog_coverage", y, total_bl / rev.value, ins + [rev],
+                    f"total backlog {fmt(total_bl, 'money')} / revenue {m(rev)}")
+                if not bt:
+                    assumptions.add("Total backlog = funded + unfunded as reported (the company does not report a total).")
+            if emp and emp.value:
+                put("revenue_per_fte", y, rev.value / emp.value, [rev, emp], f"revenue {m(rev)} / {fmt(emp.value, 'count')} employees")
+        if capex and dep and dep.value:
+            put("capex_to_dep", y, capex.value / dep.value, [capex, dep], f"capex {m(capex)} / depreciation {m(dep)}")
+        for name in segments:
+            sr, sp = get(f"seg_rev:{name}", y), get(f"seg_profit:{name}", y)
+            if sr and sp and sr.value:
+                put(f"seg_margin:{name}", y, sp.value / sr.value * 100, [sp, sr],
+                    f"{name} profit {m(sp)} / revenue {m(sr)}", kind="pct")
+
+    return calcs, sorted(assumptions)
 
 
-def _fmt(cell: Cell | None) -> str:
-    if cell is None or cell.value is None:
+# ---- render -------------------------------------------------------------------
+def _cell_text(cell: Cell | None) -> str:
+    if cell is None:
         return "Not disclosed"
-    num = f"{cell.value:.1f}%" if cell.is_pct else (
-        f"({abs(cell.value):,.1f})" if cell.value < 0 else f"{cell.value:,.1f}")
     pages = ", ".join(cell.pages)
-    cite = f"(calc.; p{'p' if len(cell.pages) > 1 else ''}. {pages})" if cell.calc else f"(p. {pages})"
-    mark = ""
-    if not cell.calc:
-        mark = " ✓" if cell.corroborated_on else " †"
-        if cell.warning:
-            mark += " ⚠"
-    return f"{num} {cite}{mark}"
+    if cell.calc:
+        return f"{fmt(cell.value, cell.kind)} (calc.; p{'p' if len(cell.pages) > 1 else ''}. {pages})"
+    mark = " ✓" if cell.corroborated_on else " †"
+    if cell.warning:
+        mark += " ⚠"
+    return f"{fmt(cell.value, cell.kind)} (p{'p' if len(cell.pages) > 1 else ''}. {pages}){mark}"
 
 
-def render(t: FinTable) -> tuple[str, list[str]]:
-    """Return (markdown table, list of check lines for under the table)."""
-    lines = ["| Metric ($ in millions) | " + " | ".join(t.years) + " |",
-             "|---|" + "---|" * len(t.years)]
-    calc_rows = {"revenue_growth", "gross_margin", "capex_pct"}
-    for row in ORDER:
-        cells = [_fmt(t.cells.get((row, y))) for y in t.years]
-        if row in calc_rows:
-            cells = ["n/a" if c == "Not disclosed" else c for c in cells]   # calc impossible, not undisclosed
-        lines.append(f"| {LABELS[row]} | " + " | ".join(cells) + " |")
+def render(t: FinTable) -> str:
+    out = []
+    segments = sorted({k.split(":", 1)[1] for (k, _) in t.cells if k.startswith("seg_margin:")})
+    for title, rows, keep_all in TABLES:
+        rows = [r for row in rows for r in ([f"seg_margin:{s}" for s in segments] if row == "SEGMENTS" else [row])]
+        body = []
+        for row in rows:
+            texts = [_cell_text(t.cells.get((row, y))) for y in t.years]
+            is_calc = row in CALC_ROWS or row.startswith("seg_margin:")
+            if is_calc:
+                texts = ["n/a" if x == "Not disclosed" else x for x in texts]
+            if not keep_all and all(x in ("n/a", "Not disclosed") for x in texts):
+                continue
+            body.append(f"| {t.labels[row]} | " + " | ".join(texts) + " |")
+        if not body:
+            continue
+        unit = "$ in millions" if title != "Operating metrics" else "$ in millions, ratios as noted"
+        out += [f"**{title}**", "", f"| Metric ({unit}) | " + " | ".join(t.years) + " |",
+                "|---|" + "---|" * len(t.years), *body, ""]
+    return "\n".join(out)
 
-    sourced = [(k, c) for k, c in t.cells.items() if not c.calc]
-    corr = [c for _, c in sourced if c.corroborated_on]
-    checks = [f"Cross-check: {len(corr)} of {len(sourced)} sourced cells match the same figure for the same "
-              f"year on at least one other page (✓). † = found on one page only; verify manually."]
+
+def checks(t: FinTable) -> list[str]:
+    sourced = [c for c in t.cells.values() if not c.calc]
+    corr = [c for c in sourced if c.corroborated_on]
+    lines = [f"Cross-check: {len(corr)} of {len(sourced)} sourced inputs match the same figure for the same year "
+             f"on at least one other page (✓). † = found on one page only; verify manually.",
+             "Every (calc.) figure is computed by code from the cited inputs; formulas are listed in calcs.json."]
+    lines += [f"Method: {a}" for a in t.assumptions]
     for (row, y), c in sorted(t.cells.items()):
         if c.warning:
-            checks.append(f"⚠ {LABELS[row]} {y}: {c.warning}.")
-    checks += [f"⚠ {p}." for p in t.problems]
-    return "\n".join(lines), checks
+            lines.append(f"⚠ {t.labels[row]} {y}: {c.warning}.")
+    lines += [f"⚠ {p}." for p in t.problems]
+    return lines

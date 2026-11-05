@@ -79,6 +79,11 @@ RULES FOR THE MODEL (apply to every section):
 
 - Commentary: [3–5 bullets on trends, each cited]
 
+[Code also adds three calculated tables after the summary table, each figure labeled "calc." with its inputs cited:
+ Cash conversion & earnings quality (organic growth, OCF, FCF, FCF / Adj. EBITDA, GAAP EBITDA, add-backs, DSO, DIO);
+ Balance sheet & liquidity (debt, cash + investments, net debt, gross and net leverage, liquidity);
+ Operating metrics (backlog coverage, capex / depreciation, revenue per employee, contract-type mix, segment margins).]
+
 ## 6. Quality of Earnings Flags
 
 - Non-GAAP adjustments and add-backs [list each with amount and cite]

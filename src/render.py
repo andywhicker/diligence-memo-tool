@@ -165,7 +165,7 @@ def _setup(doc, company):
     normal.element.rPr.rFonts.set(qn("w:eastAsia"), FONT)
     normal.font.size = Pt(BODY_PT)
 
-    for style_name in ("List Bullet", "List Bullet 2", "List Number"):
+    for style_name in ("List Bullet", "List Bullet 2", "List Bullet 3", "List Number"):
         st = doc.styles[style_name]
         st.font.name, st.font.size = FONT, Pt(BODY_PT)
 
@@ -258,7 +258,7 @@ def _subheading(doc, text):
 
 
 def _bullet(doc, text, level, small=False):
-    style = "List Bullet" if level == 0 else "List Bullet 2"
+    style = ["List Bullet", "List Bullet 2", "List Bullet 3"][min(level, 2)]
     p = doc.add_paragraph(style=style)
     _spacing(p, 0, 2 if small else 3)
     add_inline(p, text, size=SMALL_PT + 0.5 if small else BODY_PT, color=SLATE if small else None)
@@ -382,7 +382,7 @@ def to_docx(memo_md: str, out_path: Path) -> Path:
 
     section, small = "", False
     while i < len(lines):
-        line = lines[i]
+        line = re.sub(r"\s\(\d\):\*\*", ":**", lines[i])     # drop template counts like "Key positives (3):"
         s = line.strip()
         if s.startswith("## "):
             small = False
@@ -402,7 +402,7 @@ def to_docx(memo_md: str, out_path: Path) -> Path:
             _table(doc, block, kind)
             continue
         elif re.match(r"^\s*[-*]\s", line):
-            level = 1 if (len(line) - len(line.lstrip())) >= 2 else 0
+            level = (len(line) - len(line.lstrip())) // 2      # 2 spaces of indent per level
             _bullet(doc, re.sub(r"^\s*[-*]\s+", "", line), level, small=small)
         elif re.match(r"^\d+\.\s", s):
             num, text = s.split(".", 1)

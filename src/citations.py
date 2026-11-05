@@ -20,8 +20,9 @@ from dataclasses import dataclass, field
 
 from src.verify import _EXEMPT, _NUMBER
 
-_ID = re.compile(r"\[(F\d{2}-\d{3})\]")
-_ID_RUN = re.compile(r"(?:\s*\[F\d{2}-\d{3}\])+")
+_ID_TOKEN = r"F\d{2}-\d{3}|C-[A-Z0-9_]+-[A-Z0-9_]+"      # findings (F08-056) and code calcs (C-FCF-FY2026)
+_ID = re.compile(rf"\[({_ID_TOKEN})\]")
+_ID_RUN = re.compile(rf"(?:\s*\[(?:{_ID_TOKEN})\])+")
 _PLACEHOLDER = re.compile(r"\{\{[A-Z_]+\}\}")
 _LIST_PREFIX = re.compile(r"^\s*(?:[-*>]|\d+[.)])\s+")
 _HEADER_NUM = re.compile(r"^#+\s*\d+\.")
@@ -47,6 +48,8 @@ def _number_forms(f: dict) -> set[str]:
                 x = float(bare)
             except ValueError:
                 continue
+            for dp in (0, 1, 2):                    # ordinary rounding: 2.61 -> 2.6, 1,183.0 -> 1183
+                forms.add(f"{x:.{dp}f}")
             unit = (f.get("unit") or "").lower()
             # divisors converting the stated unit to other common units (<1 means multiply)
             scales = []
@@ -95,21 +98,24 @@ def _safe_float(s: str):
 
 
 def _page_cite(ids: list[str], by_id: dict) -> str:
-    pages = []
+    pages, calc = [], False
     for i in ids:
-        p = by_id[i]["page"]
-        if p not in pages:
-            pages.append(p)
+        f = by_id[i]
+        for p in (f["pages"] if f.get("category") == "calc" else [f["page"]]):
+            if p not in pages:
+                pages.append(p)
+        calc = calc or f.get("category") == "calc"
     pages.sort(key=lambda p: (not p.isdigit(), int(p) if p.isdigit() else 0, p))
-    return f"(p. {pages[0]})" if len(pages) == 1 else f"(pp. {', '.join(pages)})"
+    prefix = "calc.; " if calc else ""
+    return f"({prefix}p. {pages[0]})" if len(pages) == 1 else f"({prefix}pp. {', '.join(pages)})"
 
 
 def normalize_id_brackets(text: str) -> str:
     """'[F14-038, F14-036]' -> '[F14-038][F14-036]' (models sometimes group IDs in one bracket)."""
     def split(m):
-        ids = re.findall(r"F\d{2}-\d{3}", m.group(0))
+        ids = re.findall(_ID_TOKEN, m.group(0))
         return "".join(f"[{i}]" for i in ids)
-    return re.sub(r"\[\s*F\d{2}-\d{3}(?:\s*[,;]\s*F\d{2}-\d{3})+\s*\]", split, text)
+    return re.sub(rf"\[\s*(?:{_ID_TOKEN})(?:\s*[,;]\s*(?:{_ID_TOKEN}))+\s*\]", split, text)
 
 
 def enforce(draft: str, findings: list[dict]) -> tuple[str, CitationReport]:
@@ -211,5 +217,7 @@ def _is_label_only(s: str) -> bool:
     """Lines like '**Financial**' or 'Table:' that introduce content rather than state facts."""
     s = _LIST_PREFIX.sub("", s).strip()
     core = re.sub(r"\b(?:fy)?(?:19|20)\d\d\b", "", s.strip("*_: "), flags=re.I).strip()   # years are fine in labels
+    for pattern in _EXEMPT:                                    # so are "(3)", "Top 10", "Item 7"
+        core = pattern.sub("", core)
     looks_like_label = s.endswith(":") or s.endswith(":**") or (s.startswith("**") and s.endswith("**"))
     return looks_like_label and len(core) < 60 and not _NUMBER.search(core)
